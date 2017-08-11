@@ -3,7 +3,7 @@ import getData
 from Person import Person
 print "Susanne, Regina"
 
-# Hadoukin
+# Hadoukin2
 reload(sys)
 f = "toy/FT1845.csv"
 fo = open(f) # This is simple how to open a file
