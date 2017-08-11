@@ -2,7 +2,7 @@ class Person:
     def __init__(self, year):
         assert isinstance(year, int)
         self.year = year
-        self.KIPnr = str()
+        self.kipNr = str()
         self.kilde = str()
         self.sogn = str()
         self.herred = str()
