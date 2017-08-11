@@ -22,7 +22,7 @@ people = []
 # 17 kommentarer
 # 18 foedeaar
 
- # Hej Susanne !!!!
+ # Hej zuzka !!!!
 def getPeople(file):
     fo = open(file)
     while True:
