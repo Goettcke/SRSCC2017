@@ -30,10 +30,14 @@ print "Weight is: " + str(weight)
 
 
 f = "1845smallutf8.csv"
-getData.get_people_to(f)
-p = getData.people[1]
+
+getData.get_people_to(f,"K")
+p = getData.people[2]
 assert isinstance(p, Person)
-print str(len(p.test)) + p.navn + str(p.test == "1845")
+print str(p.navn)
+print p.sogn
+print p.foedeaar
+print str(p.kon == "M")
 
 
 
