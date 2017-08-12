@@ -1,7 +1,8 @@
 from Person import Person
-fo = open("TOY/FT1845.csv") # This is simple how to open a file
 
 people = []
+bad_formatted_people = []
+
 # 0 kipnr
 # 1  kilde
 # 2 sogn
@@ -23,8 +24,8 @@ people = []
 # 18 foedeaar
 
  # Hej Zuzka !!!! !!!
-def getPeople(file):
-    fo = open(file)
+def getPeople(filename):
+    fo = open(filename)
     while True:
         line = fo.readline().decode("iso-8859-1")
         lineSplit = line.split("|")
@@ -58,24 +59,40 @@ def getPeople(file):
 
 def get_people_to(filename):
     fo = open(filename)
+    counter = 1
     while True:
-        line = fo.readline().decode("iso-8859-1")
+        line = fo.readline()
         lineSplit = line.split("|")
         if not line :
             break
         else :
-            p = Person(1845)
-            p.amt = lineSplit[1]
-            p.herred = lineSplit[2]
-            p.sogn = lineSplit[3]
-            p.navn = lineSplit[4]
-            p.koen = lineSplit[5]
-            p.foedested = lineSplit[6]
-            p.foedeaar = lineSplit[7]
-            p.civilstand = lineSplit[8]
-            p.position = lineSplit[9]
-            p.erhverv = lineSplit[10]
-            p.kipnr = lineSplit[11]
-            p.lbnr = lineSplit[12]
+            if (len(lineSplit)  != 13) :
+                #print counter
+                #print line
+                #print(len(lineSplit))
+                #print lineSplit[3]
+                bad_formatted_people.append(line)
+            else :
+                counter = counter + 1
+                p = Person(1845)
+                p.amt = lineSplit[0]
+                p.herred = lineSplit[1]
+                p.sogn = lineSplit[2]
+                p.test = lineSplit[3]
+                p.navn = lineSplit[4]
+                p.koen = lineSplit[5]
+                p.foedested = lineSplit[6]
+                p.foedeaar = lineSplit[7]
+                p.civilstand = lineSplit[8]
+                p.position = lineSplit[9]
+                p.erhverv = lineSplit[10]
+                p.kipnr = lineSplit[11]
+                p.lbnr = lineSplit[12]
             people.append(p)
+    print "Bad formatted length: " + str(len(bad_formatted_people))
+    print "Good people " + str(len(people))
+    p = people[1300000]
+    assert isinstance(p,Person)
+    print p.navn
+
 
