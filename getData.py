@@ -73,7 +73,16 @@ def get_people_to(filename,koen):
                 p.herred = lineSplit[1]
                 p.sogn = lineSplit[2]
                 p.test = lineSplit[3]
-                p.navn = lineSplit[4]
+
+
+                navn_split = lineSplit[4].split(" ")
+                p.fornavn = navn_split[0]
+
+                for i in range(1,len(navn_split)-1,1):
+                    p.mlnavn = p.mlnavn + navn_split[i][0]
+
+                p.efternavn = navn_split[-1]
+
                 p.koen = lineSplit[5]
                 p.foedested = lineSplit[6]
                 p.foedeaar = lineSplit[7]

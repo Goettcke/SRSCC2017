@@ -12,7 +12,9 @@ class Person:
         self.stednavn = str()
         self.husstands_familienr = int()
         self.matr_nr_adresse = None
-        self.navn = str()
+        self.fornavn = str()
+        self.mlnavn = str()
+        self.efternavn = str()
         self.kon = bool()
         self.alder_tal = int()
         self.foedeaar = int()
