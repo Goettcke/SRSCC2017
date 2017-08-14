@@ -9,7 +9,7 @@ print "Susanne, Regina"
 
 
 
-f = "1845smallutf8.csv"
+f = "FT1845_SDU_V2.csv"
 getData.get_people_to(f,"k")
 
 
@@ -20,5 +20,6 @@ print p.fornavn + " " + p.mlnavn + " " + p.efternavn
 
 metaphoneret = singlemetaphone(p.efternavn,1)
 print metaphoneret
+
 
 #metaphoneret = singlemetaphone(niels laustsen pleiesøn,1)
