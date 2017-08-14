@@ -1,24 +1,24 @@
-import sys
+# -*- coding: utf-8 -*-
+
 import getData
-from Person import Person
+from metaphone import singlemetaphone
+
+from Person import Person, foedested_comparison, foedeaar_comparison
+
 print "Susanne, Regina"
 
 
-reload(sys)
-f = "toy/FT1845.csv"
-fo = open(f) # This is simple how to open a file
 
-line = fo.readline().decode('iso-8859-1') # For at kunne haandterer danske tegn
-line = fo.readline().decode('iso-8859-1') # For at kunne haandterer danske tegn
-
-lineSplit = line.split("|")
-
-p = Person(1845)
-p.herred = lineSplit[4]
-
-print "Person year: " + str(p.year)
-print "herred " + p.herred
-print line
-getData.getPeople(f)
+f = "1845smallutf8.csv"
+getData.get_people_to(f,"k")
 
 
+p = getData.people[2]
+assert isinstance(p, Person)
+
+print p.fornavn + " " + p.mlnavn + " " + p.efternavn
+
+metaphoneret = singlemetaphone(p.efternavn,1)
+print metaphoneret
+
+#metaphoneret = singlemetaphone(niels laustsen pleiesøn,1)
