@@ -60,6 +60,41 @@ def getPeople(filename):
 def get_people_to(filename,koen):
     fo = open(filename)
     counter = 1
+    for line in fo:
+        lineSplit = line.split("|")
+        if (len(lineSplit)  == 13 and koen == lineSplit[5]) :
+            counter = counter + 1
+            p = Person(1845)
+            p.amt = lineSplit[0]
+            p.herred = lineSplit[1]
+            p.sogn = lineSplit[2]
+            p.test = lineSplit[3]
+
+
+            navn_split = lineSplit[4].split(" ")
+            p.fornavn = navn_split[0]
+
+            for i in range(1,len(navn_split)-1,1):
+                p.mlnavn = p.mlnavn + navn_split[i][0]
+
+            p.efternavn = navn_split[-1]
+
+            p.koen = lineSplit[5]
+            p.foedested = lineSplit[6]
+            p.foedeaar = lineSplit[7]
+            p.civilstand = lineSplit[8]
+            p.position = lineSplit[9]
+            p.erhverv = lineSplit[10]
+            p.kipnr = lineSplit[11]
+            p.lbnr = lineSplit[12]
+            people.append(p)
+
+
+
+"""
+def get_people_to(filename,koen):
+    fo = open(filename)
+    counter = 1
     while True:
         line = fo.readline()
         lineSplit = line.split("|")
@@ -92,47 +127,6 @@ def get_people_to(filename,koen):
                 p.kipnr = lineSplit[11]
                 p.lbnr = lineSplit[12]
                 people.append(p)
-
-
-
-"""
-def get_people_to(filename):
-    fo = open(filename)
-    counter = 1
-    while True:
-        line = fo.readline()
-        lineSplit = line.split("|")
-        if not line :
-            break
-        else :
-            if (len(lineSplit)  != 13) :
-                #print counter
-                #print line
-                #print(len(lineSplit))
-                #print lineSplit[3]
-                bad_formatted_people.append(line)
-            else :
-                counter = counter + 1
-                p = Person(1845)
-                p.amt = lineSplit[0]
-                p.herred = lineSplit[1]
-                p.sogn = lineSplit[2]
-                p.test = lineSplit[3]
-                p.navn = lineSplit[4]
-                p.koen = lineSplit[5]
-                p.foedested = lineSplit[6]
-                p.foedeaar = lineSplit[7]
-                p.civilstand = lineSplit[8]
-                p.position = lineSplit[9]
-                p.erhverv = lineSplit[10]
-                p.kipnr = lineSplit[11]
-                p.lbnr = lineSplit[12]
-            people.append(p)
-    print "Bad formatted length: " + str(len(bad_formatted_people))
-    print "Good people " + str(len(people))
-    p = people[1300000]
-    assert isinstance(p,Person)
-    print p.navn
     
 
 

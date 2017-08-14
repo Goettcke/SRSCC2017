@@ -2,7 +2,6 @@
 
 
 def singlemetaphone(text, method) : #method 1 == single, method 2 == double
-
     length = len(text)
     text = text.lower()
     vokaler = ['a','e','i','o','u','æ','ø','å']
@@ -79,7 +78,7 @@ def singlemetaphone(text, method) : #method 1 == single, method 2 == double
 
         res = res.translate(None, "".join(vokaler)) # Fjerner alle vokaler
         print "res: " + res
-        return text
+        return res
 
 
     if method == 2:
@@ -146,7 +145,7 @@ def singlemetaphone(text, method) : #method 1 == single, method 2 == double
     print "res: " + res
 
 
-    return text
+    return res
 
 
 

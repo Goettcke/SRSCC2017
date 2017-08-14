@@ -10,11 +10,15 @@ print "Susanne, Regina"
 
 
 f = "1845smallutf8.csv"
+getData.get_people_to(f,"k")
 
-getData.get_people_to(f,"K")
+
 p = getData.people[2]
 assert isinstance(p, Person)
-print str(p.fornavn + " " + p.mlnavn + " " + p.efternavn)
 
-metaphoneret = singlemetaphone(p.fornavn,1)
+print p.fornavn + " " + p.mlnavn + " " + p.efternavn
+
+metaphoneret = singlemetaphone(p.efternavn,1)
 print metaphoneret
+
+#metaphoneret = singlemetaphone(niels laustsen pleiesøn,1)
