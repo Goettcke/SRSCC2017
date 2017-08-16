@@ -61,8 +61,10 @@ def get_people_to(filename,koen):
     fo = open(filename)
     counter = 1
     for line in fo:
+        print line
+        print ord(line[1])
         lineSplit = line.split("|")
-        if (len(lineSplit)  == 13 and koen == lineSplit[5]) :
+        if (len(lineSplit)  == 12 and koen == lineSplit[4]) :
             counter = counter + 1
             p = Person(1845)
             p.amt = lineSplit[0]
@@ -128,8 +130,4 @@ def get_people_to(filename,koen):
                 p.lbnr = lineSplit[12]
                 people.append(p)
     
-
-
-
-
 """

@@ -2,33 +2,33 @@ class Person:
     def __init__(self, year):
         assert isinstance(year, int)
         self.year = year
-        self.kipNr = str()
-        self.kilde = str()
-        self.sogn = str()
-        self.herred = str()
-        self.amt = str()
+        self.kipNr = unicode()
+        self.kilde = unicode()
+        self.sogn = unicode()
+        self.herred = unicode()
+        self.amt = unicode()
         self.lbnr = int()
-        self.kildehenvisning = str()
-        self.stednavn = str()
+        self.kildehenvisning = unicode()
+        self.stednavn = unicode()
         self.husstands_familienr = int()
         self.matr_nr_adresse = None
-        self.fornavn = str()
-        self.mlnavn = str()
-        self.efternavn = str()
+        self.fornavn = unicode()
+        self.mlnavn = unicode()
+        self.efternavn = unicode()
         self.kon = bool()
         self.alder_tal = int()
         self.foedeaar = int()
         self.civilstand = int()
-        self.civilstand_source = str()
-        self.foedested = str()
+        self.civilstand_source = unicode()
+        self.foedested = unicode()
         self.valid = True
         self.matches = dict()
-        self.erhverv = str()
+        self.erhverv = unicode()
         self.nregteskab = int()
         self.id = -1
         self.group = -1
         self.home_index = -1
-        self.test = str()
+        self.test = unicode()
         pass
 
 
