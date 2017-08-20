@@ -1,5 +1,5 @@
 from Person import Person
-
+from Person import is_overhoved
 people = []
 bad_formatted_people = []
 
@@ -23,7 +23,6 @@ bad_formatted_people = []
 # 17 kommentarer
 # 18 foedeaar
 
- # Hej Zuzka !!!! !!!
 def getPeople(filename):
     fo = open(filename)
     while True:
@@ -56,15 +55,28 @@ def getPeople(filename):
             print "kipnr:  " + p.kipNr + " navn: " + p.navn
             people.append(p)
 
+#0 amt
+#1 herred
+#2 sogn
+#3 navn
+#4 koen
+#5 foedested
+#6 foedeaar
+#7 Civilstand
+#8 Position
+#9 Erhverv
+#10 husstnr
+#11 kipnr
+#12 loebenr
 
 def get_people_to(filename,koen):
     fo = open(filename)
     counter = 1
     for line in fo:
-        print line
-        print ord(line[1])
+        #print line
+        #print ord(line[1])
         lineSplit = line.split("|")
-        if (len(lineSplit)  == 12 and koen == lineSplit[4]) :
+        if (len(lineSplit)  == 13 and koen == lineSplit[4]) :
             counter = counter + 1
             p = Person(1845)
             p.amt = lineSplit[0]
@@ -92,42 +104,38 @@ def get_people_to(filename,koen):
             people.append(p)
 
 
-
-"""
-def get_people_to(filename,koen):
+def get_people_1845(filename,koen):
     fo = open(filename)
     counter = 1
-    while True:
-        line = fo.readline()
+    for line in fo:
         lineSplit = line.split("|")
-        if not line :
-            break
-        else :
-            if (len(lineSplit)  == 13 and koen == lineSplit[5]) :
-                counter = counter + 1
-                p = Person(1845)
-                p.amt = lineSplit[0]
-                p.herred = lineSplit[1]
-                p.sogn = lineSplit[2]
-                p.test = lineSplit[3]
+        #print line
+        if (len(lineSplit)  == 13 and koen == lineSplit[4]) :
+            p = Person(1845)
+            p.amt = lineSplit[0]
+            p.herred = lineSplit[1]
+            p.sogn = lineSplit[2]
+            navn_split = lineSplit[3].split(" ")
+            p.fornavn = navn_split[0]
 
-
-                navn_split = lineSplit[4].split(" ")
-                p.fornavn = navn_split[0]
-
+            if (len(navn_split) > 2) :
                 for i in range(1,len(navn_split)-1,1):
+                    #print ord(navn_split[i][0])
                     p.mlnavn = p.mlnavn + navn_split[i][0]
 
-                p.efternavn = navn_split[-1]
+            p.efternavn = navn_split[-1]
 
-                p.koen = lineSplit[5]
-                p.foedested = lineSplit[6]
-                p.foedeaar = lineSplit[7]
-                p.civilstand = lineSplit[8]
-                p.position = lineSplit[9]
-                p.erhverv = lineSplit[10]
-                p.kipnr = lineSplit[11]
-                p.lbnr = lineSplit[12]
-                people.append(p)
-    
-"""
+            p.koen = lineSplit[4]
+            p.foedested = lineSplit[5]
+            p.foedeaar = lineSplit[6]
+            p.civilstand = lineSplit[7]
+            p.position = lineSplit[8]
+            p.erhverv = lineSplit[9]
+            p.husstands_familienr = lineSplit[9]
+            p.kipnr = lineSplit[11]
+            p.lbnr = lineSplit[12]
+            people.append(p)
+        #print counter
+        counter += 1
+
+    print len(people)

@@ -19,7 +19,6 @@ def singlemetaphone(text, method) : #method 1 == single, method 2 == double
                 res += "k"
                 ruleUsed = True
 
-
             elif i == "ü" and ruleUsed == False :
                 res += "y"
                 ruleUsed = True
@@ -30,13 +29,19 @@ def singlemetaphone(text, method) : #method 1 == single, method 2 == double
 
 # Skipping Rules
             elif i == "h" and ruleUsed == False:
-                if j > 2 :
-                    if (text[j - 2] != "p") :
+                if j >= 2 :
+                    if (text[j-2] == "c") :
+                        res += ""
+                        ruleUsed = True
+                    elif(text[j-2] == "t") :
+                        res += ""
+                        ruleUsed = True
+                    elif (text[j - 2] != "p" and ruleUsed == False) :
                         res += i
-                    ruleUsed = True
+                        ruleUsed = True
 
             elif i == "s" and ruleUsed == False:
-                if j > 2 :
+                if j >= 2 :
                     if text[j - 2] != "d" :
                         res += i
                     ruleUsed = True

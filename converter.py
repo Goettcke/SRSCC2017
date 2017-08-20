@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-f = open("FT1845_SDU_V2.csv")
+import re
+f = open("FT1845_2_utf8.csv")
 ffw = open("otooe.csv","w")
 
 
@@ -16,4 +17,3 @@ for line in f :
         else :
             resline += c.lower()
     ffw.write(resline)
-
