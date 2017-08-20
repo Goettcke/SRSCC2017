@@ -95,7 +95,7 @@ def get_people_to(filename,koen):
 
             p.koen = lineSplit[5]
             p.foedested = lineSplit[6]
-            p.foedeaar = lineSplit[7]
+            p.foedeaar = int(lineSplit[7])
             p.civilstand = lineSplit[8]
             p.position = lineSplit[9]
             p.erhverv = lineSplit[10]
@@ -110,6 +110,7 @@ def get_people_1845(filename,koen):
     for line in fo:
         lineSplit = line.split("|")
         #print line
+
         if (len(lineSplit)  == 13 and koen == lineSplit[4]) :
             p = Person(1845)
             p.amt = lineSplit[0]
@@ -124,10 +125,12 @@ def get_people_1845(filename,koen):
                     p.mlnavn = p.mlnavn + navn_split[i][0]
 
             p.efternavn = navn_split[-1]
-
             p.koen = lineSplit[4]
             p.foedested = lineSplit[5]
-            p.foedeaar = lineSplit[6]
+            if(is_number(lineSplit[6])) :
+                p.foedeaar = int(lineSplit[6])
+            else :
+                p.foedeaar = 0
             p.civilstand = lineSplit[7]
             p.position = lineSplit[8]
             p.erhverv = lineSplit[9]
@@ -135,7 +138,13 @@ def get_people_1845(filename,koen):
             p.kipnr = lineSplit[11]
             p.lbnr = lineSplit[12]
             people.append(p)
-        #print counter
         counter += 1
 
-    print len(people)
+    print "Got : " + str(len(people)) + " people from dataset"
+
+def is_number(foedeaar):
+    try:
+        int(foedeaar)
+        return True
+    except:
+        return False

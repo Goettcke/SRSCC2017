@@ -2,10 +2,6 @@ import collections
 
 _no_bytes_err = 'expected str, got bytes'
 
-'''
-This is the formal implementation of the damerau levenshtein distance. This is not something he has come up with, but 
-a python interpretation of the description on wikipedia. 
-'''
 
 def damerau_levenshtein_distance(s1, s2):
 
