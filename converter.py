@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 import re
 
+
+
+
+
 def danishcharacterconverter(inputfile, outputfile) :
-    inputfile = open("FT1845_2_utf8.csv")
-    outputfile = open("otooe.csv", "w")
+    inputfile = open(inputfile)
+    outputfile = open(outputfile, "w")
     for line in inputfile :
         resline = ""
         for c in line :

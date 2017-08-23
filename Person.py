@@ -18,7 +18,6 @@ class Person:
         self.mlnavn = str() # dm uden metaphone
         self.efternavn = str() #dmld metaphone
         self.meta_fornavn = str()  # dmld metaphone
-        self.meta_mlnavn = str()  # dm uden metaphone
         self.meta_efternavn = str()  # dmld metaphone
         self.kon = bool()
         self.alder_tal = int() # direkte maalign eller
@@ -42,10 +41,9 @@ class Person:
 def name_comparison(p1, p2) :
     assert isinstance(p1, Person)
     assert isinstance(p2, Person)
-    fn_percentdifference = damerau_levenshtein_distance(p1.meta_fornavn, p2.meta_fornavn) / percent_denominator(p1.meta_fornavn,p2.meta_fornavn)
-    ml_percentdifference = damerau_levenshtein_distance(p1.mlnavn, p2.mlnavn) / percent_denominator(p1.mlnavn,p2.mlnavn)
-    en_percentdifference = damerau_levenshtein_distance(p1.meta_efternavn, p2.meta_efternavn) / percent_denominator(p1.meta_efternavn,p2.meta_efternavn)
-
+    fn_percentdifference = damerau_levenshtein_distance(p1.meta_fornavn, p2.meta_fornavn) / float(percent_denominator(p1.meta_fornavn,p2.meta_fornavn))
+    ml_percentdifference = damerau_levenshtein_distance(p1.mlnavn, p2.mlnavn) / float(percent_denominator(p1.mlnavn,p2.mlnavn))
+    en_percentdifference = damerau_levenshtein_distance(p1.meta_efternavn, p2.meta_efternavn) / float(percent_denominator(p1.meta_efternavn,p2.meta_efternavn))
     result = fn_percentdifference + ml_percentdifference + en_percentdifference
     return result/3
 
@@ -66,7 +64,7 @@ def foedeaar_comparison(person1,person2) : # Enten 10 eller 0 Grov sortering
     if (abs(person1.foedeaar - person2.foedeaar) < 3) :
         return 10 #man kan udvide med en variabel, der aendres med distancen imellem de to aldre
     else :
-        return 0
+        return 3 - abs(person1.foedeaar - person2.foedeaar)
 
 
 
@@ -75,7 +73,7 @@ def foedested_comparison(person1, person2) : # Maks 5 else 0
     assert isinstance(person1, Person)
     assert isinstance(person2, Person)
     if person1.foedested == person2.foedested :
-        return 5
+        return 10
     else :
         return 0
 
@@ -87,26 +85,31 @@ def is_overhoved(person) :
         return False
 def overhoved_comparison(p1,p2) :
     if(is_overhoved(p1) == is_overhoved(p2)) :
-        return 5
+        return 3
+    else :
+        return 0
 
 def person_distance_score(p1, p2):
     assert isinstance(p1, Person)
     assert isinstance(p2, Person)
     result = 0
-    if (name_comparison(p1, p2) <= 0.10) : # Smaller than 33percent difference
-        result = foedeaar_comparison(p1,p2) + foedested_comparison(p1,p2)
-        if overhoved_comparison(p1,p2) :
-           result += 2 # Just some weight we can always adjust it
-
-    if (result != 0) :
-        return result
+    if (name_comparison(p1, p2) <= 0.5) : # Smaller than 33percent difference
+        result = foedeaar_comparison(p1,p2) + foedested_comparison(p1,p2) + overhoved_comparison(p1,p2) + erhverv_comparison(p1,p2)
 
     return result # Which in this case is equal to 0
 
-def is_match(p1,p2):
+def erhverv_comparison(p1,p2):
     assert isinstance(p1, Person)
     assert isinstance(p2, Person)
-    limit = 10
+    if(p1.erhverv == p2.erhverv):
+        return 5
+    else :
+        return -1
+
+
+def is_match(p1,p2,limit):
+    assert isinstance(p1, Person)
+    assert isinstance(p2, Person)
     if(person_distance_score(p1, p2) > limit) :
         return True
     else :
@@ -122,6 +125,8 @@ def person_print_information(p1):
     print "foedeaar: " + str(p1.foedeaar)
 
     print "is overhoved: " + str(is_overhoved(p1))
+
+    print "erhverv: " + str(p1.erhverv)
 
     print "\n"
 
