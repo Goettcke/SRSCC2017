@@ -34,6 +34,7 @@ class Person:
         self.home_index = -1
         self.test = str()
         self.position = str()
+        self.weight = int() # The weight, that the person was found using.
         pass
 
 
@@ -93,7 +94,7 @@ def person_distance_score(p1, p2):
     assert isinstance(p1, Person)
     assert isinstance(p2, Person)
     result = 0
-    if (name_comparison(p1, p2) <= 0.5) : # Smaller than 33percent difference
+    if (name_comparison(p1, p2) <= 0.1) : # Smaller than 33percent difference
         result = foedeaar_comparison(p1,p2) + foedested_comparison(p1,p2) + overhoved_comparison(p1,p2) + erhverv_comparison(p1,p2)
 
     return result # Which in this case is equal to 0
@@ -128,14 +129,35 @@ def person_print_information(p1):
 
     print "erhverv: " + str(p1.erhverv)
 
+    print "weight: " + str(p1.weight)
+
     print "\n"
 
+def person_array_iterator(listi) :
+    for p in listi :
+        person_print_information(p) # p is a person
 
 
+def personstring (person) :
+    output = "navn: " + str(person.fornavn) + " " + str(person.mlnavn) + " " + str(person.efternavn) + "\n"
+    output += "foedested: " + str(person.foedested) + "\n"
+    output += "foedeaar: " + str(person.foedeaar) + "\n"
+    output += "is overhoved: " + str(is_overhoved(person)) + "\n"
+    output += "erhverv: " + str(person.erhverv) + "\n"
+    output += "weight: " + str(person.weight) + "\n\n"
+    return output
 
 
+def person_array_writer(person, listi) : # person is the person we're looking for
+    output = "Person we're looking for: \n --------------------\n"
+    output += personstring(person)
+    output += "--------------------\n \n---- Matches ----" + "\n"
 
+    for p in listi :
+        output += personstring(p) # p is a person
 
+    f = open(str("output/" + person.fornavn + " " + person.efternavn) + ".txt", 'w')
+    f.write(output)
 
 
 

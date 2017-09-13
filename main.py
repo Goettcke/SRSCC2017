@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import getData
+import os
+from multiprocessing import  Process
 from dataSplitter import *
 from dm import damerau_levenshtein_distance
 from metaphone import singlemetaphone
@@ -9,42 +11,59 @@ from Person import Person, foedested_comparison, foedeaar_comparison
 from Person import *
 print "Susanne, Regina"
 
-p1 = Person(1845)
-p2 = Person(1850)
-p3 = Person(1850)
 
-f1845 = "FT1845_SDU_V2.csv"
-ffw1845 = "f1845.csv"
-f1850 = "FT1850_SDU_V2.csv"
-finter = "inter.csv"
-ffw1850 = "f1850.csv"
+def lookupperson(peoplelist, limit) :
+    ffw1845 = "f1845.csv"
+    ffw1850 = "f1850.csv"
+    people1845 = getData.get_people(ffw1845, "m", 1845)
+    people1850 = getData.get_people(ffw1850, "m", 1850)
+    candidates = []
 
-""" This is how we convert the files from their format to ours
-datasplitter is not needed anymore"""
-#danishcharacterconverter(f1845,ffw1845)
+    for number in peoplelist :
+        person = people1845[number]
+        while (len(candidates) < 10 and limit > 0) :
+            limit = limit - 1
+            print limit
+            for i in range (0,len(people1850)):
+                if (is_match(people1850[i], person, limit)):
+                    print "Success"
+                    if candidates.__contains__(people1850[i]) :
+                        print "contained the dude"
+                    else :
+                        p = people1850[i]
+                        p.weight = limit
+                        print "weight: " +  str(p.weight)
+                        candidates.append(p)
 
-#splitter(f1850,finter)
-#danishcharacterconverter(finter,ffw1850)
+        candidates.sort(key=lambda x : x.weight, reverse=True)
+        person_array_iterator(candidates)
+        person_array_writer(person,candidates)
+
+if __name__ == '__main__':
+    threads = [x for x in range(0,4)]
+    print threads
+    intervals = []
+    counter = 1;
+    peopleperthread = 1
+    limit = 20
+    for i in threads :
+        personnumbers = []
+        for j in range(counter,counter+peopleperthread) :
+            personnumbers.append(j)
+            counter = counter + peopleperthread
+        intervals.append(personnumbers)
+    print intervals
+    procs = []
+    for number in threads:
+        proc = Process(target=lookupperson, args=(intervals[number],limit,))
+        procs.append(proc)
+        proc.start()
+
+    for proc in procs:
+        proc.join()
 
 
-
-people1845 = getData.get_people(ffw1845, "m",1845)
-people1850 = getData.get_people(ffw1850, "m",1850)
-
-
-candidates = set([])
-limit = 17
-oldnumberofcandidates = 0
-while (len(candidates) < 10 and limit > 0) :
-    limit = limit - 1
-    print limit
-    for i in range (0,len(people1850)):
-        if (is_match(people1850[i], people1845[0], limit)):
-            print "Success"
-            candidates.add(people1850[i])
-
-
-
+"""
 for person in candidates:
     person_print_information(person)
 # Example that shows how the name_comparison function works. So 1. is 100 percent difference. 0 is no difference.
@@ -73,3 +92,4 @@ person_print_information(p2)
 
 print name_comparison(p1,p2)
 
+"""
