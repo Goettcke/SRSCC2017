@@ -111,10 +111,25 @@ def erhverv_comparison(p1,p2):
 def is_match(p1,p2,limit):
     assert isinstance(p1, Person)
     assert isinstance(p2, Person)
-    if(person_distance_score(p1, p2) > limit) :
+    if(person_distance_score(p1, p2) > limit) : # So just use the distance directlyt
         return True
     else :
         return False
+# removes matches in the list that are lower than a certain limit. 
+def removelowmatches(limit,inputlist) : 
+    output = [] 
+    for person in inputlist : 
+        if person.weight > limit : 
+            output.append(person)
+    print "removed: " + str(len(inputlist)-len(output)) + " candidates" 
+    return output
+
+def findminlimit(inputlist) : 
+    limit = 30 #This should be a universal max weight
+    for person in inputlist : 
+        if(person.weight < limit) : 
+            limit = person.weight
+    return person.weight
 
 def person_print_information(p1):
     assert isinstance(p1, Person)
@@ -156,7 +171,7 @@ def person_array_writer(person, listi) : # person is the person we're looking fo
     for p in listi :
         output += personstring(p) # p is a person
 
-    f = open(str("output/" + person.fornavn + " " + person.efternavn) + ".txt", 'w')
+    f = open(str("output/" + person.fornavn + "_" + person.mlnavn +  "_"  + person.efternavn + str(person.foedeaar) + str(person.weight)) + ".txt", 'w')
     f.write(output)
 
 
