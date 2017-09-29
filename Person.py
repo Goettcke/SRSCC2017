@@ -55,6 +55,27 @@ def name_comparison(p1, p2) :
 
     return 2 # 100% mismatch
 
+def getPerson(peoplearr , pid) :
+    left = 0
+    right = len(peoplearr)
+    while left < right:
+        mid = (left + right) // 2
+        if pid > peoplearr[mid].id:
+            left = mid + 1
+        else:
+            right = mid
+    if left != len(peoplearr) and peoplearr[left].id == pid:
+        return peoplearr[left]
+    else:
+        raise ValueError("{!r} is not in sequence".format(pid))
+
+
+def alternategetPerson(peoplearr, pid) :
+    print str(peoplearr[pid].id) + " " + str(pid)
+
+def husdistance(peoplearr1,peoplearr2,p1,p2) :
+    print "hadoukin"
+
 
 def percent_denominator(navn1,navn2):
     denominator = float(max(len(navn1), len(navn2)))

@@ -2,7 +2,7 @@ import re
 
 from bisect import bisect_left
 
-from Person import Person
+from Person import *
 from Person import is_overhoved
 bad_formatted_people = []
 from metaphone import singlemetaphone
@@ -103,45 +103,30 @@ def get_people(filename, koen,  year):
     print "Got : " + str(len(people)) + " people from dataset"
     return people
 
-def getPerson(peoplearr , pid) :
-    left = 0
-    right = len(peoplearr)
-    while left < right:
-        mid = (left + right) // 2
-        if pid > peoplearr[mid].id:
-            left = mid + 1
-        else:
-            right = mid
-    if left != len(peoplearr) and peoplearr[left].id == pid:
-        return peoplearr[left]
-    else:
-        raise ValueError("{!r} is not in sequence".format(pid))
-
-
-
 def getHustande(peopleArr) :
     currentHouse = peopleArr[0].husstands_familienr
     husArr = []
     currentIndex = 0
     people = []
-    for person in peopleArr :
-        if (person.husstands_familienr != currentHouse) :
+    for i in xrange (len(peopleArr)) :
+        if (peopleArr[i].husstands_familienr != currentHouse) :
             husArr.append(people)
-            currentHouse = person.husstands_familienr
+            currentHouse = peopleArr[i].husstands_familienr
             people = []
         else :
-            people.append(person.id)
+            people.append(peopleArr[i].id)
 
-        person.hustandsindex = currentIndex
+        peopleArr[i].hustandsindex = currentIndex
         currentIndex += 1
 
     print str(husArr[0]) + "getting person"
-    p = getPerson(peopleArr, husArr[0][0])
-    p2 = peopleArr[0]
+    p = getPerson(peopleArr, husArr[1337][0])
+    p2 = peopleArr[1337]
     print len(peopleArr)
     print p.fornavn +" " +  p.mlnavn  + " " + p.efternavn
     print p2.fornavn +" " +  p2.mlnavn  + " " + p2.efternavn
     print " got person"
+    print alternategetPerson(peopleArr,p.id)
     return husArr
 
 

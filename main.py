@@ -73,7 +73,7 @@ if __name__ == '__main__':
     print threads
     intervals = []
     counter = 1
-    peopleperthread = 50
+    peopleperthread = 2
     limit = 20
     for i in threads :
         personnumbers = []
