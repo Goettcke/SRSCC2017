@@ -1,6 +1,9 @@
 
 from dm import damerau_levenshtein_distance
 class Person:
+
+    testcounter = 0
+
     def __init__(self, year):
         assert isinstance(year, int)
         self.year = year # tilfoej en ekstra parameter, der kigger paa om aaret giver mening i forhold til alderen.
@@ -28,13 +31,13 @@ class Person:
         self.valid = True
         self.matches = dict()
         self.erhverv = str()
-        self.nregteskab = int()
         self.id = -1
         self.group = -1
         self.home_index = -1
         self.test = str()
         self.position = str()
         self.weight = int() # The weight, that the person was found using.
+        self.navnsplit = []
         pass
 
 
@@ -42,11 +45,16 @@ class Person:
 def name_comparison(p1, p2) :
     assert isinstance(p1, Person)
     assert isinstance(p2, Person)
-    fn_percentdifference = damerau_levenshtein_distance(p1.meta_fornavn, p2.meta_fornavn) / float(percent_denominator(p1.meta_fornavn,p2.meta_fornavn))
-    ml_percentdifference = damerau_levenshtein_distance(p1.mlnavn, p2.mlnavn) / float(percent_denominator(p1.mlnavn,p2.mlnavn))
-    en_percentdifference = damerau_levenshtein_distance(p1.meta_efternavn, p2.meta_efternavn) / float(percent_denominator(p1.meta_efternavn,p2.meta_efternavn))
-    result = fn_percentdifference + ml_percentdifference + en_percentdifference
-    return result/3
+    if(len(p1.meta_efternavn) > 0 and len(p2.meta_efternavn) > 0 and len(p1.meta_fornavn) > 0 and len(p2.meta_fornavn) > 0 ):
+        if(p1.meta_fornavn[0] == p2.meta_fornavn[0] and p1.meta_efternavn[0] == p2.meta_efternavn[0]) :
+            fn_percentdifference = damerau_levenshtein_distance(p1.meta_fornavn, p2.meta_fornavn) / float(percent_denominator(p1.meta_fornavn,p2.meta_fornavn))
+            ml_percentdifference = damerau_levenshtein_distance(p1.mlnavn, p2.mlnavn) / float(percent_denominator(p1.mlnavn,p2.mlnavn))
+            en_percentdifference = damerau_levenshtein_distance(p1.meta_efternavn, p2.meta_efternavn) / float(percent_denominator(p1.meta_efternavn,p2.meta_efternavn))
+            result = fn_percentdifference + ml_percentdifference + en_percentdifference
+            return result / 3
+
+    return 2 # 100% mismatch
+
 
 def percent_denominator(navn1,navn2):
     denominator = float(max(len(navn1), len(navn2)))
@@ -62,11 +70,12 @@ def foedeaar_comparison(person1,person2) : # Enten 10 eller 0 Grov sortering
     assert isinstance(person1, Person)
     assert isinstance(person2, Person)
 
-    if (abs(person1.foedeaar - person2.foedeaar) < 3) :
+    if (abs(person1.foedeaar == person2.foedeaar)) :
         return 10 #man kan udvide med en variabel, der aendres med distancen imellem de to aldre
+    elif (abs(person1.foedeaar - person2.foedeaar) < 6) :
+        return 10 - (abs(person1.foedeaar - person2.foedeaar))*2
     else :
-        return 3 - abs(person1.foedeaar - person2.foedeaar)
-
+        return -100
 
 
 # TODO apply double metaphone to inexact matching foedested
@@ -94,7 +103,7 @@ def person_distance_score(p1, p2):
     assert isinstance(p1, Person)
     assert isinstance(p2, Person)
     result = 0
-    if (name_comparison(p1, p2) <= 0.1) : # Smaller than 33percent difference
+    if (name_comparison(p1, p2) <= 0.1) : # Smaller than  some percent difference
         result = foedeaar_comparison(p1,p2) + foedested_comparison(p1,p2) + overhoved_comparison(p1,p2) + erhverv_comparison(p1,p2)
 
     return result # Which in this case is equal to 0
@@ -146,6 +155,14 @@ def person_print_information(p1):
 
     print "weight: " + str(p1.weight)
 
+    print "sogn: " + str(p1.sogn)
+    print "amt: " + str(p1.amt)
+    print "husstandsfamilienr: " + str(p1.husstands_familienr)
+    print "meta_fornavn: " + str(p1.meta_fornavn)
+    print "meta_efternavn: " + "'" + str(p1.meta_efternavn)+ "'"
+    print "koen: " + str(p1.kon)
+    print "civilstand: " + str(p1.civilstand)
+    print "navnsplit: " + str(p1.navnsplit)
     print "\n"
 
 def person_array_iterator(listi) :
@@ -159,6 +176,14 @@ def personstring (person) :
     output += "foedeaar: " + str(person.foedeaar) + "\n"
     output += "is overhoved: " + str(is_overhoved(person)) + "\n"
     output += "erhverv: " + str(person.erhverv) + "\n"
+    output += "sogn: " + str(person.sogn) + "\n"
+    output += "amt: " + str(person.amt) + "\n"
+    output += "husstandsfamilienr: " + str(person.husstands_familienr) + "\n"
+    output += "meta_fornavn: " + "'" + str(person.meta_fornavn) +"'" + "\n"
+    output += "meta_efternavn: " + "'" + str(person.meta_efternavn) + "'"  + "\n"
+    output += "koen: " + str(person.kon) + "\n"
+    output += "civilstand: " + str(person.civilstand) + "\n"
+    output += "navnsplit: " + str(person.navnsplit) + "\n"
     output += "weight: " + str(person.weight) + "\n\n"
     return output
 
@@ -173,10 +198,6 @@ def person_array_writer(person, listi) : # person is the person we're looking fo
 
     f = open(str("output/" + person.fornavn + "_" + person.mlnavn +  "_"  + person.efternavn + str(person.foedeaar) + str(person.weight)) + ".txt", 'w')
     f.write(output)
-
-
-
-
 
 
 

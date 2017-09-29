@@ -1,3 +1,4 @@
+import re
 from Person import Person
 from Person import is_overhoved
 bad_formatted_people = []
@@ -37,7 +38,7 @@ from metaphone import singlemetaphone
 #12 loebenr
 
 
-def get_people(filename, koen,year):
+def get_people(filename, koen,  year):
     fo = open(filename)
     counter = 1
     people = []
@@ -52,26 +53,40 @@ def get_people(filename, koen,year):
             p.sogn = lineSplit[2]
             navn_split = lineSplit[3].split(" ")
             p.fornavn = navn_split[0]
+            p.navnsplit = navn_split
 
             if (len(navn_split) > 2) :
                 for i in range(1,len(navn_split)-1,1):
-                    #print ord(navn_split[i][0])
                     try :
                         p.mlnavn = p.mlnavn + navn_split[i][0]
                     except:
                         print "error with person" + line
 
-            p.efternavn = navn_split[-1]
+            if(len(navn_split) == 2) :
+                p.efternavn = navn_split[1]
+            else :
+                p.efternavn = navn_split[-1]
+
+
             p.koen = lineSplit[4]
-            p.foedested = lineSplit[5]
+
+            matchObj = re.match(r'(.*)sogn(.*)', p.foedested)
+
+            if (matchObj == None):
+                p.foedested = p.sogn
+            else:
+                p.foedested = lineSplit[5]
+
             if(is_number(lineSplit[6])) :
                 p.foedeaar = int(lineSplit[6])
             else :
                 p.foedeaar = 0
+
+
             p.civilstand = lineSplit[7]
             p.position = lineSplit[8]
             p.erhverv = lineSplit[9]
-            p.husstands_familienr = lineSplit[9]
+            p.husstands_familienr = lineSplit[10]
             p.kipnr = lineSplit[11]
             p.lbnr = lineSplit[12]
             p.meta_fornavn = singlemetaphone(p.fornavn,1)

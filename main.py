@@ -1,5 +1,4 @@
 import getData
-import os
 from multiprocessing import  Process
 from dataSplitter import *
 from dm import damerau_levenshtein_distance
@@ -9,15 +8,15 @@ from Person import Person, foedested_comparison, foedeaar_comparison
 from Person import *
 print "Susanne, Regina"
 #New problem seems to be that we only end up with highest valued candidates. 
-def lookupperson(peoplelist, limit) :
+def lookupperson(peoplelist) :
     ffw1845 = "f1845.csv"
     ffw1850 = "f1850.csv"
     people1845 = getData.get_people(ffw1845, "m", 1845)
     people1850 = getData.get_people(ffw1850, "m", 1850)
-    candidates = []
     maxcandidates = 1000
     minlimit = 30 
     for number in peoplelist :
+        candidates = []
         person = people1845[number]
         print person.fornavn
         i = number + 1
@@ -28,8 +27,8 @@ def lookupperson(peoplelist, limit) :
                 candidates.append(p)
                 if(minlimit > p.weight) : 
                     minlimit = p.weight
-            i = i + 1
-        for j in range (i,len(people1850)):
+            i += 1
+        for j in range (0,len(people1850)):
             persondistance = person_distance_score(people1850[j], person)
             if (persondistance > minlimit): 
                 candidates = removelowmatches(minlimit, candidates)
@@ -47,8 +46,8 @@ if __name__ == '__main__':
     threads = [x for x in range(0,1)]
     print threads
     intervals = []
-    counter = 1;
-    peopleperthread = 1
+    counter = 1
+    peopleperthread = 100
     limit = 20
     for i in threads :
         personnumbers = []
@@ -59,7 +58,7 @@ if __name__ == '__main__':
     print intervals
     procs = []
     for number in threads:
-        proc = Process(target=lookupperson, args=(intervals[number],limit,))
+        proc = Process(target=lookupperson, args=(intervals[number],))
         procs.append(proc)
         proc.start()
 
