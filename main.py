@@ -2,19 +2,20 @@ import getData
 from multiprocessing import  Process
 from dataSplitter import *
 from dm import damerau_levenshtein_distance
+from getData import getHustande
 from metaphone import singlemetaphone
 from converter import danishcharacterconverter
 from Person import Person, foedested_comparison, foedeaar_comparison
 from Person import *
 print "Susanne, Regina"
-#New problem seems to be that we only end up with highest valued candidates. 
+#New problem seems to be that we only end up with highest valued candidates.
 def lookupperson(peoplelist) :
     ffw1845 = "f1845.csv"
     ffw1850 = "f1850.csv"
     people1845 = getData.get_people(ffw1845, "m", 1845)
     people1850 = getData.get_people(ffw1850, "m", 1850)
     maxcandidates = 1000
-    minlimit = 30 
+    minlimit = 30
     for number in peoplelist :
         candidates = []
         person = people1845[number]
@@ -23,31 +24,56 @@ def lookupperson(peoplelist) :
         while len(candidates) < maxcandidates and i < len(people1850):
             p = people1850[i]
             p.weight = person_distance_score(p,person)
-            if (p.weight > 0) : 
+            if (p.weight > 0) :
                 candidates.append(p)
-                if(minlimit > p.weight) : 
+                if(minlimit > p.weight) :
                     minlimit = p.weight
             i += 1
         for j in range (0,len(people1850)):
             persondistance = person_distance_score(people1850[j], person)
-            if (persondistance > minlimit): 
+            if (persondistance > minlimit):
+                """
                 candidates = removelowmatches(minlimit, candidates)
                 minlimit = findminlimit(candidates)# must make a minlimit finder here 
                 p = people1850[j]
                 p.weight = persondistance 
                 #print "weight: " +  str(p.weight) # Should probably add probability here 
-                candidates.append(p)
+                """
+                candidates.append(people1850[j])
 
         candidates.sort(key=lambda x : x.weight, reverse=True)
-        person_array_iterator(candidates)
-        person_array_writer(person,candidates)
+
+        if(len(candidates) > 0) :
+            candidates = takeWeights(candidates)
+            person_array_iterator(candidates)
+            person_array_writer(person,candidates)
+        else :
+            print "Foej for helvede"
+    husArr1845 = getHustande(people1845)
+    husArr1850 = getHustande(people1850)
+    print husArr1845[1]
+    print husArr1850[1]
+
+
+def takeWeights (candidateList) :
+    weightNr = 1
+    resCandidates = []
+    currentWeight = candidateList[0].weight
+    for candidate in candidateList :
+        if (weightNr > 4) :
+            return resCandidates
+        else :
+            resCandidates.append(candidate)
+            if (candidate.weight < currentWeight) :
+                weightNr += 1
+    return resCandidates
 
 if __name__ == '__main__':
-    threads = [x for x in range(0,1)]
+    threads = [x for x in range(0,2)]
     print threads
     intervals = []
     counter = 1
-    peopleperthread = 100
+    peopleperthread = 50
     limit = 20
     for i in threads :
         personnumbers = []

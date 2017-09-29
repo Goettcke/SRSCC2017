@@ -16,6 +16,7 @@ class Person:
         self.kildehenvisning = str()
         self.stednavn = str()
         self.husstands_familienr = int()
+        self.hustandsindex = int() # index i hustandsarray
         self.matr_nr_adresse = None
         self.fornavn = str() #dmld metaphone
         self.mlnavn = str() # dm uden metaphone
@@ -33,7 +34,6 @@ class Person:
         self.erhverv = str()
         self.id = -1
         self.group = -1
-        self.home_index = -1
         self.test = str()
         self.position = str()
         self.weight = int() # The weight, that the person was found using.
