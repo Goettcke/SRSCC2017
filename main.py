@@ -36,13 +36,16 @@ def lookupperson(peoplelist) :
         candidates.sort(key=lambda x : x.weight, reverse=True)
 
         if(len(candidates) > 0) :
+            print "length of candidates" + str(len(candidates))
             candidates = takeWeights(candidates)
+            print "length of candidates" + str(len(candidates))
             for candidate in candidates:
                 if (husdistance(people1845,people1850,person,candidate,husArr1845,husArr1850) == 10) :
+                    candidate.husmatch = True
                     candidate.weight += 1000
 
             candidates.sort(key=lambda x: x.weight, reverse=True)
-            person_array_iterator(candidates)
+            #person_array_iterator(candidates)
             person_array_writer(person, candidates)
         else :
             print "Foej for helvede"
@@ -50,16 +53,13 @@ def lookupperson(peoplelist) :
 
 
 def takeWeights (candidateList) :
-    weightNr = 1
     resCandidates = []
-    currentWeight = candidateList[0].weight
     for candidate in candidateList :
-        if (weightNr > 4) :
+        currentWeight = candidate.weight
+        if (currentWeight <= 0) :
             return resCandidates
         else :
             resCandidates.append(candidate)
-            if (candidate.weight < currentWeight) :
-                weightNr += 1
     return resCandidates
 
 if __name__ == '__main__':
@@ -67,7 +67,7 @@ if __name__ == '__main__':
     print threads
     intervals = []
     counter = 1
-    peopleperthread = 1000
+    peopleperthread = 2
     limit = 20
     for i in threads :
         personnumbers = []

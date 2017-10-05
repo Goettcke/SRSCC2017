@@ -37,6 +37,7 @@ class Person:
         self.position = str()
         self.weight = int() # The weight, that the person was found using.
         self.navnsplit = []
+        self.husmatch = bool()
         pass
 
 
@@ -73,11 +74,9 @@ def alternategetPerson(peoplearr, pid) :
     print str(peoplearr[pid].id) + " " + str(pid)
 
 def husdistance(peoplearr1,peoplearr2,p1,p2,husarr1,husarr2) :
-    print "husindex p1: " + str(p1.hustandsindex)
-    print "husindex p2: " + str(p2.hustandsindex)
     hus1size = len(husarr1[p1.hustandsindex])
     hus2size = len(husarr2[p2.hustandsindex])
-
+    #print "hussizes " + str(hus1size) + " _ " +  str(hus2size)
     totalhusdistance = 0
     peopleinhouse1 = []
     peopleinhouse2 = []
@@ -88,7 +87,9 @@ def husdistance(peoplearr1,peoplearr2,p1,p2,husarr1,husarr2) :
         peopleinhouse2.append(peoplearr2[husarr2[p2.hustandsindex][i]])
 
     for person in peopleinhouse1 :
+        print "Muuh "   + person.fornavn
         for person2 in peopleinhouse2 :
+            print "Maaaeeh " + person2.fornavn
             totalhusdistance += person_distance_score(person,person2)
     if(hus1size != 0) :
         if((totalhusdistance / hus1size) > 5) :
@@ -237,7 +238,7 @@ def person_array_writer(person, listi) : # person is the person we're looking fo
     for p in listi :
         output += personstring(p) # p is a person
 
-    f = open(str("output/" + person.fornavn + "_" + person.mlnavn +  "_"  + person.efternavn + str(person.foedeaar) + str(person.weight)) + ".txt", 'w')
+    f = open(str("output/" + person.fornavn + "_" + person.mlnavn +  "_"  + person.efternavn + str(person.foedeaar) + "_" + str(person.husstands_familienr)) + ".txt", 'w')
     f.write(output)
 
 
