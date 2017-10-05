@@ -113,11 +113,11 @@ def getHustande(peopleArr) :
             husArr.append(people)
             currentHouse = peopleArr[i].husstands_familienr
             people = []
+            currentIndex += 1
         else :
             people.append(peopleArr[i].id)
 
         peopleArr[i].hustandsindex = currentIndex
-        currentIndex += 1
 
     print str(husArr[0]) + "getting person"
     p = getPerson(peopleArr, husArr[1337][0])

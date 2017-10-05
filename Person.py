@@ -1,4 +1,3 @@
-
 from dm import damerau_levenshtein_distance
 class Person:
 
@@ -73,8 +72,29 @@ def getPerson(peoplearr , pid) :
 def alternategetPerson(peoplearr, pid) :
     print str(peoplearr[pid].id) + " " + str(pid)
 
-def husdistance(peoplearr1,peoplearr2,p1,p2) :
-    print "hadoukin"
+def husdistance(peoplearr1,peoplearr2,p1,p2,husarr1,husarr2) :
+    print "husindex p1: " + str(p1.hustandsindex)
+    print "husindex p2: " + str(p2.hustandsindex)
+    hus1size = len(husarr1[p1.hustandsindex])
+    hus2size = len(husarr2[p2.hustandsindex])
+
+    totalhusdistance = 0
+    peopleinhouse1 = []
+    peopleinhouse2 = []
+
+    for i in range(hus1size) :
+        peopleinhouse1.append(peoplearr1[husarr1[p1.hustandsindex][i]])
+    for i in range(hus2size) :
+        peopleinhouse2.append(peoplearr2[husarr2[p2.hustandsindex][i]])
+
+    for person in peopleinhouse1 :
+        for person2 in peopleinhouse2 :
+            totalhusdistance += person_distance_score(person,person2)
+    if(hus1size != 0) :
+        if((totalhusdistance / hus1size) > 5) :
+            return 10
+        else :
+            return 0
 
 
 def percent_denominator(navn1,navn2):
@@ -159,7 +179,7 @@ def findminlimit(inputlist) :
     for person in inputlist : 
         if(person.weight < limit) : 
             limit = person.weight
-    return person.weight
+    return limit
 
 def person_print_information(p1):
     assert isinstance(p1, Person)
