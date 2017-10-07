@@ -1,4 +1,5 @@
 from dm import damerau_levenshtein_distance
+import re
 class Person:
 
     testcounter = 0
@@ -38,6 +39,7 @@ class Person:
         self.weight = int() # The weight, that the person was found using.
         self.navnsplit = []
         self.husmatch = bool()
+        self.housestring = str()
         pass
 
 
@@ -55,6 +57,7 @@ def name_comparison(p1, p2) :
 
     return 2 # 100% mismatch
 
+#Legacy code, just if binarysearch is needed in some future development
 def getPerson(peoplearr , pid) :
     left = 0
     right = len(peoplearr)
@@ -81,22 +84,54 @@ def husdistance(peoplearr1,peoplearr2,p1,p2,husarr1,husarr2) :
     peopleinhouse1 = []
     peopleinhouse2 = []
 
+    if(hus1size == 0 or hus2size == 0) :
+        housedivisor = max(hus1size, hus2size)
+    else :
+        housedivisor = min(hus1size,hus2size)
+
     for i in range(hus1size) :
         peopleinhouse1.append(peoplearr1[husarr1[p1.hustandsindex][i]])
     for i in range(hus2size) :
         peopleinhouse2.append(peoplearr2[husarr2[p2.hustandsindex][i]])
 
     for person in peopleinhouse1 :
-        print "Muuh "   + person.fornavn
+        # print "Muuh "   + person.fornavn # check it makes the correct comparisons
         for person2 in peopleinhouse2 :
-            print "Maaaeeh " + person2.fornavn
+         #   print "Maaaeeh " + person2.fornavn # Just to check that It actually enters the loop
             totalhusdistance += person_distance_score(person,person2)
     if(hus1size != 0) :
-        if((totalhusdistance / hus1size) > 5) :
+        if((totalhusdistance / housedivisor) > 5) :
             return 10
         else :
             return 0
 
+def housestring(peoplearr1,peoplearr2,p1,p2,husarr1,husarr2) :
+    output = "   Start of New HOUSE  \n  "
+    hus1size = len(husarr1[p1.hustandsindex])
+    hus2size = len(husarr2[p2.hustandsindex])
+    peopleinhouse1 = []
+    peopleinhouse2 = []
+
+    for i in range(hus1size) :
+        peopleinhouse1.append(peoplearr1[husarr1[p1.hustandsindex][i]])
+
+    for i in range(hus2size) :
+        peopleinhouse2.append(peoplearr2[husarr2[p2.hustandsindex][i]])
+
+    output += " ------- Start house1 --------- \n"
+    for person in peopleinhouse1 :
+        output += personstring(person)
+
+    output += " ------- End of house1 --------- \n"
+
+
+    output += " ------- Start house2 --------- \n"
+
+    for person2 in peopleinhouse2 :
+        output += personstring(person2)
+    output += " ------- End of house2 --------- \n"
+    output += "   End of New HOUSE  \n  "
+    return output
 
 def percent_denominator(navn1,navn2):
     denominator = float(max(len(navn1), len(navn2)))
@@ -124,10 +159,36 @@ def foedeaar_comparison(person1,person2) : # Enten 10 eller 0 Grov sortering
 def foedested_comparison(person1, person2) : # Maks 5 else 0
     assert isinstance(person1, Person)
     assert isinstance(person2, Person)
-    if person1.foedested == person2.foedested :
-        return 10
+    print "Foedested_comparison"
+    matchObj = re.match(r'(.*)sogn(.*)',person1.foedested)
+    matchObj2 = re.match(r'(.*)sogn(.*)',person2.foedested)
+
+    if (matchObj != None or matchObj2 != None): # Case either is some version of "heri sognet"
+        print "something is heri sognet"
+        if(person1.foedested == person2.foedested) :
+            return 10
+            print "their foedested matched"
+
+        else :
+            person1places = [person1.amt,person1.herred,person1.sogn]
+            person2places = [person2.amt,person2.herred,person2.sogn]
+            print "Foedested didn't exact match so making places array"
+            print person1places
+            print person2places
+
+            for p1place in person1places :
+                for p2place in person2places :
+                    if(p1place == p2place) :
+                        print p1place + " matches " + p2place
+                        return 10
     else :
-        return 0
+        if(person1.foedested == person2.foedested) :
+            print "none of the foedesteder contained sogn and matched exact"
+            return 10
+    print "none of the foedesteder contained sogn and didn't match so returning 0"
+
+    return 0
+
 
 def is_overhoved(person) :
     assert isinstance(person, Person)
@@ -135,6 +196,7 @@ def is_overhoved(person) :
         return True
     else :
         return False
+
 def overhoved_comparison(p1,p2) :
     if(is_overhoved(p1) == is_overhoved(p2)) :
         return 3
@@ -145,7 +207,7 @@ def person_distance_score(p1, p2):
     assert isinstance(p1, Person)
     assert isinstance(p2, Person)
     result = 0
-    if (name_comparison(p1, p2) <= 0.1) : # Smaller than  some percent difference
+    if (name_comparison(p1, p2) <= 0.3) : # Smaller than  some percent difference
         result = foedeaar_comparison(p1,p2) + foedested_comparison(p1,p2) + overhoved_comparison(p1,p2) + erhverv_comparison(p1,p2)
 
     return result # Which in this case is equal to 0
@@ -176,7 +238,7 @@ def removelowmatches(limit,inputlist) :
     return output
 
 def findminlimit(inputlist) : 
-    limit = 30 #This should be a universal max weight
+    limit = 30 #This should be a universal max weights
     for person in inputlist : 
         if(person.weight < limit) : 
             limit = person.weight
@@ -202,7 +264,6 @@ def person_print_information(p1):
     print "husstandsfamilienr: " + str(p1.husstands_familienr)
     print "meta_fornavn: " + str(p1.meta_fornavn)
     print "meta_efternavn: " + "'" + str(p1.meta_efternavn)+ "'"
-    print "koen: " + str(p1.kon)
     print "civilstand: " + str(p1.civilstand)
     print "navnsplit: " + str(p1.navnsplit)
     print "\n"
@@ -238,8 +299,12 @@ def person_array_writer(person, listi) : # person is the person we're looking fo
     for p in listi :
         output += personstring(p) # p is a person
 
-    f = open(str("output/" + person.fornavn + "_" + person.mlnavn +  "_"  + person.efternavn + str(person.foedeaar) + "_" + str(person.husstands_familienr)) + ".txt", 'w')
+    f = open(str("output/" + person.fornavn + "_" + person.mlnavn +  "_"  + person.efternavn + str(person.foedeaar) + "_" + str(person.husstands_familienr)) + "_"  + str(person.id) + ".txt", 'w')
     f.write(output)
+    f.close()
+    if(person.housestring != None) :
+        f = open(str("output/" + person.fornavn + "_" + person.mlnavn +  "_"  + person.efternavn + str(person.foedeaar) + "_" + str(person.husstands_familienr)) + "_"  + str(person.id) + "_house" + ".txt", 'w')
+        f.write(person.housestring)
 
 
 

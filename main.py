@@ -12,14 +12,16 @@ print "Susanne, Regina"
 def lookupperson(peoplelist) :
     ffw1845 = "f1845.csv"
     ffw1850 = "f1850.csv"
-    people1845 = getData.get_people(ffw1845, "m", 1845)
-    people1850 = getData.get_people(ffw1850, "m", 1850)
+    people1845 = getData.get_people(ffw1845, 1845)
+    people1850 = getData.get_people(ffw1850, 1850)
     husArr1845 = getHustande(people1845)
     husArr1850 = getHustande(people1850)
     minlimit = 0
     for number in peoplelist :
         candidates = []
         person = people1845[number]
+        print "Looking for"
+        person_print_information(person)
         for i in range (0,len(people1850)):
             persondistance = person_distance_score(people1850[i], person)
             if (persondistance > minlimit):
@@ -33,19 +35,17 @@ def lookupperson(peoplelist) :
                 """
                 candidates.append(p)
 
-        candidates.sort(key=lambda x : x.weight, reverse=True)
-
         if(len(candidates) > 0) :
-            print "length of candidates" + str(len(candidates))
-            candidates = takeWeights(candidates)
             print "length of candidates" + str(len(candidates))
             for candidate in candidates:
                 if (husdistance(people1845,people1850,person,candidate,husArr1845,husArr1850) == 10) :
                     candidate.husmatch = True
-                    candidate.weight += 1000
+                    candidate.weight += 20
+                    person.housestring = housestring(people1845,people1850,person,candidate,husArr1845,husArr1850)
 
             candidates.sort(key=lambda x: x.weight, reverse=True)
             #person_array_iterator(candidates)
+            candidates = takeWeights(candidates)
             person_array_writer(person, candidates)
         else :
             print "Foej for helvede"
@@ -54,20 +54,22 @@ def lookupperson(peoplelist) :
 
 def takeWeights (candidateList) :
     resCandidates = []
+    weightNR = 0
     for candidate in candidateList :
         currentWeight = candidate.weight
-        if (currentWeight <= 0) :
+        if (currentWeight <= 0 or weightNR > 4) :
             return resCandidates
         else :
             resCandidates.append(candidate)
+        weightNR += 1
     return resCandidates
 
 if __name__ == '__main__':
-    threads = [x for x in range(0,2)]
+    threads = [x for x in range(0,1)]
     print threads
     intervals = []
     counter = 1
-    peopleperthread = 2
+    peopleperthread = 1000
     limit = 20
     for i in threads :
         personnumbers = []

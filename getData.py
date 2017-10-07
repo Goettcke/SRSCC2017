@@ -41,7 +41,19 @@ from metaphone import singlemetaphone
 #12 loebenr
 
 
-def get_people(filename, koen,  year):
+"""
+
+Housematch: +20
+Foedeaar: equal: +10, 1->5 year difference +8,+6,+4,+2,0 otherwise -100. 
+Foedested : on exact match +10
+is_overhoved : +3   
+name_comparison : all names combined must not differ by more than 30% and first character in first name and last name must be equal. 
+Erhverv comparison : +5 if equal else -1 
+
+"""
+
+
+def get_people(filename, year):
     fo = open(filename)
     counter = 1
     people = []
@@ -50,7 +62,7 @@ def get_people(filename, koen,  year):
         lineSplit = line.split("|")
         #print line
         #print len(lineSplit)
-        if (len(lineSplit)  == 13 and koen == lineSplit[4]) :
+        if (len(lineSplit)  == 13) :
             p = Person(year)
             p.amt = lineSplit[0]
             p.herred = lineSplit[1]
@@ -71,15 +83,17 @@ def get_people(filename, koen,  year):
             else :
                 p.efternavn = navn_split[-1]
 
-
             p.koen = lineSplit[4]
 
-            matchObj = re.match(r'(.*)sogn(.*)', p.foedested)
+            """ 
+            matchObj = re.match(r'(.*)sogn(.*)', lineSplit[5])
 
-            if (matchObj == None):
+            if (matchObj != None):
                 p.foedested = p.sogn
             else:
                 p.foedested = lineSplit[5]
+            """
+            p.foedested = lineSplit[5]
 
             if(is_number(lineSplit[6])) :
                 p.foedeaar = int(lineSplit[6])
@@ -95,9 +109,10 @@ def get_people(filename, koen,  year):
             p.lbnr = lineSplit[12]
             p.meta_fornavn = singlemetaphone(p.fornavn,1)
             p.meta_efternavn = singlemetaphone(p.efternavn,1)
-            p.id = pid
+            p.id = pid # So all people have a unique ID
             pid += 1
             people.append(p)
+            p.housestring = None
         counter += 1
 
     print "Got : " + str(len(people)) + " people from dataset"
@@ -119,14 +134,14 @@ def getHustande(peopleArr) :
 
         peopleArr[i].hustandsindex = currentIndex
 
-    print str(husArr[0]) + "getting person"
-    p = getPerson(peopleArr, husArr[1337][0])
-    p2 = peopleArr[1337]
-    print len(peopleArr)
-    print p.fornavn +" " +  p.mlnavn  + " " + p.efternavn
-    print p2.fornavn +" " +  p2.mlnavn  + " " + p2.efternavn
-    print " got person"
-    print alternategetPerson(peopleArr,p.id)
+    # print str(husArr[0]) + "getting person"
+    #p = getPerson(peopleArr, husArr[1337][0])
+    #p2 = peopleArr[1337]
+    #print len(peopleArr)
+    #print p.fornavn +" " +  p.mlnavn  + " " + p.efternavn
+    #print p2.fornavn +" " +  p2.mlnavn  + " " + p2.efternavn
+    #print " got person"
+    #print alternategetPerson(peopleArr,p.id)
     return husArr
 
 
