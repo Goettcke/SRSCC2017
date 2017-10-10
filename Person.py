@@ -159,33 +159,38 @@ def foedeaar_comparison(person1,person2) : # Enten 10 eller 0 Grov sortering
 def foedested_comparison(person1, person2) : # Maks 5 else 0
     assert isinstance(person1, Person)
     assert isinstance(person2, Person)
-    print "Foedested_comparison"
+    #print "Foedested_comparison"
     matchObj = re.match(r'(.*)sogn(.*)',person1.foedested)
     matchObj2 = re.match(r'(.*)sogn(.*)',person2.foedested)
 
-    if (matchObj != None or matchObj2 != None): # Case either is some version of "heri sognet"
-        print "something is heri sognet"
-        if(person1.foedested == person2.foedested) :
+    if (matchObj != None and matchObj2 != None): # Case both is some version of "heri sognet"
+        if(person1.sogn == person2.sogn) :
+          #  print "Both is something herisognet, so comparing sogn"
             return 10
-            print "their foedested matched"
+        elif(person1.herred == person2.herred) :
+            return 5
 
-        else :
-            person1places = [person1.amt,person1.herred,person1.sogn]
-            person2places = [person2.amt,person2.herred,person2.sogn]
-            print "Foedested didn't exact match so making places array"
-            print person1places
-            print person2places
+    elif(matchObj != None and matchObj2 == None) :
+       # print "person1 contains herisognet"
+        person1places = [person1.amt,person1.herred,person1.sogn]
+     #   print person1places
+        for p1place in person1places :
+            if (p1place == person2.sogn):
+               # print p1place + " matches " + person2.sogn
+                return 10
 
-            for p1place in person1places :
-                for p2place in person2places :
-                    if(p1place == p2place) :
-                        print p1place + " matches " + p2place
-                        return 10
+    elif (matchObj == None and matchObj2 != None):
+       # print "person2 contains herisognet"
+        person2places = [person2.amt, person2.herred, person2.sogn]
+        for p2place in person2places:
+            if (p2place == person1.sogn):
+               # print p2place + " matches " + person1.sogn
+                return 10
     else :
         if(person1.foedested == person2.foedested) :
-            print "none of the foedesteder contained sogn and matched exact"
+           # print "none of the foedesteder contained sogn and matched exact"
             return 10
-    print "none of the foedesteder contained sogn and didn't match so returning 0"
+   # print "none of the foedesteder contained sogn and didn't match so returning 0"
 
     return 0
 

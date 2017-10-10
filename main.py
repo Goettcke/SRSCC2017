@@ -1,4 +1,5 @@
 import getData
+import sys
 from multiprocessing import  Process
 from dataSplitter import *
 from dm import damerau_levenshtein_distance
@@ -21,22 +22,23 @@ def lookupperson(peoplelist) :
         candidates = []
         person = people1845[number]
         print "Looking for"
-        person_print_information(person)
+        #person_print_information(person)
         for i in range (0,len(people1850)):
-            persondistance = person_distance_score(people1850[i], person)
-            if (persondistance > minlimit):
-                p = people1850[i]
-                p.weight = persondistance
-                """
-                candidates = removelowmatches(minlimit, candidates)
-                minlimit = findminlimit(candidates)# must make a minlimit finder here 
-                p.weight = persondistance 
-                #print "weight: " +  str(p.weight) # Should probably add probability here 
-                """
-                candidates.append(p)
+            if(person.kon == people1850[i].kon) :
+                persondistance = person_distance_score(people1850[i], person)
+                if (persondistance > minlimit):
+                    p = people1850[i]
+                    p.weight = persondistance
+                    """
+                    candidates = removelowmatches(minlimit, candidates)
+                    minlimit = findminlimit(candidates)# must make a minlimit finder here 
+                    p.weight = persondistance 
+                    #print "weight: " +  str(p.weight) # Should probably add probability here 
+                    """
+                    candidates.append(p)
 
         if(len(candidates) > 0) :
-            print "length of candidates" + str(len(candidates))
+           # print "length of candidates" + str(len(candidates))
             for candidate in candidates:
                 if (husdistance(people1845,people1850,person,candidate,husArr1845,husArr1850) == 10) :
                     candidate.husmatch = True
@@ -48,7 +50,7 @@ def lookupperson(peoplelist) :
             candidates = takeWeights(candidates)
             person_array_writer(person, candidates)
         else :
-            print "Foej for helvede"
+           print "Foej for helvede"
 
 
 
@@ -65,22 +67,32 @@ def takeWeights (candidateList) :
     return resCandidates
 
 if __name__ == '__main__':
-    threads = [x for x in range(0,1)]
-    print threads
+    lowbound = int(sys.argv[1])
+    highbound = int(sys.argv[2])
+    threads = int(sys.argv[3])
+    peopleperthread = (highbound-lowbound)/threads
+    excess = (highbound-lowbound) - peopleperthread*threads
+
     intervals = []
-    counter = 1
-    peopleperthread = 1000
+    counter = lowbound
     limit = 20
-    for i in threads :
+    for i in range(threads) :
         personnumbers = []
-        for j in range(counter,counter+peopleperthread) :
-            personnumbers.append(j)
-            counter = counter + 1
-        intervals.append(personnumbers)
+        if(i != threads - 1) :
+            for j in range(counter,counter+peopleperthread) :
+                personnumbers.append(j)
+                counter = counter + 1
+            intervals.append(personnumbers)
+        else :
+            for j in range(counter,counter+peopleperthread+excess) :
+                personnumbers.append(j)
+                counter = counter + 1
+            intervals.append(personnumbers)
+
     print intervals
     procs = []
-    for number in threads:
-        proc = Process(target=lookupperson, args=(intervals[number],))
+    for i in range(threads):
+        proc = Process(target=lookupperson, args=(intervals[i],))
         procs.append(proc)
         proc.start()
 

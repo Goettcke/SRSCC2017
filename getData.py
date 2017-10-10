@@ -49,7 +49,6 @@ Foedested : on exact match +10
 is_overhoved : +3   
 name_comparison : all names combined must not differ by more than 30% and first character in first name and last name must be equal. 
 Erhverv comparison : +5 if equal else -1 
-
 """
 
 
