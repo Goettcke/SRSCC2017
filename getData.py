@@ -74,7 +74,7 @@ def get_people(filename, year):
             if (len(navn_split) > 2) :
                 for i in range(1,len(navn_split)-1,1):
                     try :
-                        p.mlnavn = p.mlnavn + navn_split[i][0]
+                        p.mlnavn = p.mlnavn + navn_split[i] + " "
                     except:
                         print "error with person" + line
 

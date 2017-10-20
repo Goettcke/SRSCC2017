@@ -161,7 +161,7 @@ def foedeaar_comparison(person1,person2) : # Enten 10 eller 0 Grov sortering
 
     if (abs(person1.foedeaar == person2.foedeaar)) :
         return 10 #man kan udvide med en variabel, der aendres med distancen imellem de to aldre
-    elif (abs(person1.foedeaar - person2.foedeaar) < 6) :
+    elif (abs(person1.foedeaar - person2.foedeaar) <= 2) :
         return 10 - (abs(person1.foedeaar - person2.foedeaar))*2
     else :
         return -100
