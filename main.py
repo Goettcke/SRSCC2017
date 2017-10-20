@@ -24,7 +24,7 @@ def lookupperson(peoplelist) :
         print "Looking for"
         #person_print_information(person)
         for i in range (0,len(people1850)):
-            if(person.kon == people1850[i].kon) :
+            if(person.koen == people1850[i].koen) :
                 persondistance = person_distance_score(people1850[i], person)
                 if (persondistance > minlimit):
                     p = people1850[i]

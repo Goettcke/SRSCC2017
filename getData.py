@@ -52,6 +52,7 @@ Erhverv comparison : +5 if equal else -1
 """
 
 
+
 def get_people(filename, year):
     fo = open(filename)
     counter = 1

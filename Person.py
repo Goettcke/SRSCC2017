@@ -23,7 +23,8 @@ class Person:
         self.efternavn = str() #dmld metaphone
         self.meta_fornavn = str()  # dmld metaphone
         self.meta_efternavn = str()  # dmld metaphone
-        self.kon = bool()
+        #self.kon = bool()
+        self.koen = str() # "k" or "m"
         self.alder_tal = int() # direkte maalign eller
         self.foedeaar = int() # direkte maalign eller
         self.civilstand = int()
@@ -289,7 +290,7 @@ def personstring (person) :
     output += "husstandsfamilienr: " + str(person.husstands_familienr) + "\n"
     output += "meta_fornavn: " + "'" + str(person.meta_fornavn) +"'" + "\n"
     output += "meta_efternavn: " + "'" + str(person.meta_efternavn) + "'"  + "\n"
-    output += "koen: " + str(person.kon) + "\n"
+    output += "koen: " + str(person.koen) + "\n"
     output += "civilstand: " + str(person.civilstand) + "\n"
     output += "navnsplit: " + str(person.navnsplit) + "\n"
     output += "weight: " + str(person.weight) + "\n\n"
