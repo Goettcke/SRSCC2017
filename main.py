@@ -11,8 +11,8 @@ from Person import *
 print "Susanne, Regina"
 #New problem seems to be that we only end up with highest valued candidates.
 def lookupperson(peoplelist) :
-    ffw1845 = "f1845.csv"
-    ffw1850 = "f1850.csv"
+    ffw1845 = "f1845small.csv"
+    ffw1850 = "f1850small.csv"
     people1845 = getData.get_people(ffw1845, 1845)
     people1850 = getData.get_people(ffw1850, 1850)
     husArr1845 = getHustande(people1845)
