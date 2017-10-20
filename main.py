@@ -11,8 +11,8 @@ from Person import *
 print "Susanne, Regina"
 #New problem seems to be that we only end up with highest valued candidates.
 def lookupperson(peoplelist) :
-    ffw1845 = "f1845small.csv"
-    ffw1850 = "f1850small.csv"
+    ffw1845 = "f1845.csv"
+    ffw1850 = "f1850.csv"
     people1845 = getData.get_people(ffw1845, 1845)
     people1850 = getData.get_people(ffw1850, 1850)
     husArr1845 = getHustande(people1845)
@@ -21,7 +21,7 @@ def lookupperson(peoplelist) :
     for number in peoplelist :
         candidates = []
         person = people1845[number]
-        print "Looking for"
+        #print "Looking for"
         #person_print_information(person)
         for i in range (0,len(people1850)):
             if(person.koen == people1850[i].koen) :

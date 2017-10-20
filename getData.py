@@ -78,6 +78,8 @@ def get_people(filename, year):
                     except:
                         print "error with person" + line
 
+                p.mlnavn = p.mlnavn.strip()
+
             if(len(navn_split) == 2) :
                 p.efternavn = navn_split[1]
             else :
