@@ -47,12 +47,24 @@ class Person:
 def name_comparison(p1, p2) :
     assert isinstance(p1, Person)
     assert isinstance(p2, Person)
+
     if(len(p1.meta_efternavn) > 0 and len(p2.meta_efternavn) > 0 and len(p1.meta_fornavn) > 0 and len(p2.meta_fornavn) > 0 ):
         if(p1.meta_fornavn[0] == p2.meta_fornavn[0] and p1.meta_efternavn[0] == p2.meta_efternavn[0]) :
+            # Fornavn
             fn_percentdifference = damerau_levenshtein_distance(p1.meta_fornavn, p2.meta_fornavn) / float(percent_denominator(p1.meta_fornavn,p2.meta_fornavn))
+
+            # Higher weight on fornavn
+            if fn_percentdifference >= 0.15:
+                return 2
+
+            # Mellemnavn
             ml_percentdifference = damerau_levenshtein_distance(p1.mlnavn, p2.mlnavn) / float(percent_denominator(p1.mlnavn,p2.mlnavn))
+
+            # Efternavn
             en_percentdifference = damerau_levenshtein_distance(p1.meta_efternavn, p2.meta_efternavn) / float(percent_denominator(p1.meta_efternavn,p2.meta_efternavn))
+
             result = fn_percentdifference + ml_percentdifference + en_percentdifference
+
             return result / 3
 
     return 2 # 100% mismatch
