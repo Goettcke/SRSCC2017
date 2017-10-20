@@ -41,7 +41,6 @@ class Person:
         self.navnsplit = []
         self.husmatch = bool()
         self.housestring = str()
-        pass
 
 
 # TODO Apply Double Metaphone to inexact names.
@@ -86,7 +85,7 @@ def husdistance(peoplearr1,peoplearr2,p1,p2,husarr1,husarr2) :
     peopleinhouse2 = []
 
     if(hus1size == 0 or hus2size == 0) :
-        housedivisor = max(hus1size, hus2size)
+        housedivisor = max(hus1size, hus2size) ## Could potentially give division by 0 if both zero but not in 1845 1850.
     else :
         housedivisor = min(hus1size,hus2size)
 
