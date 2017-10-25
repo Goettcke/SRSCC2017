@@ -19,56 +19,6 @@ from Person import *
 print "Susanne, Regina"
 #New problem seems to be that we only end up with highest valued candidates.
 
-def find_maps():
-    def helper(m, person):
-        amt, herred, sogn = person.amt, person.herred, person.sogn
-        if amt == "amt": # Ignore a weird person 0.
-            #print(personstring_short(person))
-            return
-        if not amt in m:
-            m[amt] = {}
-
-        if not herred in m[amt]:
-            m[amt][herred] = {}
-
-        if not sogn in m[amt][herred]:
-            m[amt][herred][sogn] = 0
-
-        m[amt][herred][sogn] += 1
-
-    def output(s, m):
-        with open(s, "w") as f:
-            for amt in sorted(m.keys()):
-                for herred in sorted(m[amt].keys()):
-                    for sogn in sorted(m[amt][herred].keys()):
-                        count = m[amt][herred][sogn]
-                        f.write("%s ; %s ; %s ; %d\n" % (amt, herred, sogn, count))
-
-    def do(n):
-        if n == 1845:
-            filename = config.f1845_filename
-        elif n == 1850:
-            filename = config.f1850_filename
-        else:
-            return
-
-        people = getData.get_people(filename, n)
-
-        m = {}
-
-        for p in people:
-            helper(m, p)
-
-        if n == 1845:
-            output("map1845.csv", m)
-        elif n == 1850:
-            output("map1850.csv", m)
-
-    print("--- 1845 ---")
-    do(1845)
-    print("--- 1850 ---")
-    do(1850)
-
 
 
 def lookupperson(peoplelist) :
@@ -143,9 +93,6 @@ if __name__ == '__main__':
 
     peopleperthread = (highbound-lowbound)/threads
     excess = (highbound-lowbound) - peopleperthread*threads
-
-    find_maps()
-    exit()
 
     intervals = []
     counter = lowbound
