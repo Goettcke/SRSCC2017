@@ -1,3 +1,9 @@
+#!/usr/bin/env python2
+
+# EDIT configs/default.ini TO CHANGE SETTINGS
+from config import config
+
+import os.path
 import getData
 import sys
 from multiprocessing import  Process
@@ -8,13 +14,14 @@ from metaphone import singlemetaphone
 from converter import danishcharacterconverter
 from Person import Person, foedested_comparison, foedeaar_comparison
 from Person import *
+
+
 print "Susanne, Regina"
 #New problem seems to be that we only end up with highest valued candidates.
+
 def lookupperson(peoplelist) :
-    ffw1845 = "f1845.csv"
-    ffw1850 = "f1850.csv"
-    people1845 = getData.get_people(ffw1845, 1845)
-    people1850 = getData.get_people(ffw1850, 1850)
+    people1845 = getData.get_people(config.f1845_filename, 1845)
+    people1850 = getData.get_people(config.f1850_filename, 1850)
     husArr1845 = getHustande(people1845)
     husArr1850 = getHustande(people1850)
     minlimit = 0
@@ -23,7 +30,7 @@ def lookupperson(peoplelist) :
         person = people1845[number]
         #print "Looking for"
         #person_print_information(person)
-        for i in range (0,len(people1850)):
+        for i in xrange (0,len(people1850)):
             if(person.koen == people1850[i].koen) :
                 persondistance = person_distance_score(people1850[i], person)
                 if (persondistance > minlimit):
@@ -42,7 +49,7 @@ def lookupperson(peoplelist) :
             for candidate in candidates:
                 if (husdistance(people1845,people1850,person,candidate,husArr1845,husArr1850) == 10) :
                     candidate.husmatch = True
-                    candidate.weight += 20
+                    candidate.weight += config.husmatch_weight_boost
                     person.housestring = housestring(people1845,people1850,person,candidate,husArr1845,husArr1850)
 
             candidates.sort(key=lambda x: x.weight, reverse=True)
@@ -50,7 +57,7 @@ def lookupperson(peoplelist) :
             candidates = takeWeights(candidates)
             person_array_writer(person, candidates)
         else :
-           print "Foej for helvede"
+           print "No good candidates found for " + personstring_short(person)
 
 
 
@@ -67,9 +74,21 @@ def takeWeights (candidateList) :
     return resCandidates
 
 if __name__ == '__main__':
+    if len(sys.argv) < 4:
+        print("Usage: ./main.py lowbound highbound threads [config-file]")
+        sys.exit(1)
+
     lowbound = int(sys.argv[1])
     highbound = int(sys.argv[2])
     threads = int(sys.argv[3])
+
+    if len(sys.argv) >= 5:
+        config_filename = sys.argv[4]
+    else:
+        config_filename = "default.ini"
+
+    config.init(os.path.join("configs", config_filename))
+
     peopleperthread = (highbound-lowbound)/threads
     excess = (highbound-lowbound) - peopleperthread*threads
 

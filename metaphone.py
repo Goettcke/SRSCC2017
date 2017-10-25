@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 
+# EDIT configs/default.ini TO CHANGE SETTINGS
+from config import config
+
 
 def singlemetaphone(text, method):  # method 1 == single, method 2 == double
     
-    # Don't do metaphone transformation for this test.
-    # TODO: Remove this 
-    return text
+    if not config.use_metaphone:
+        return text
 
     length = len(text)
     text = text.lower()

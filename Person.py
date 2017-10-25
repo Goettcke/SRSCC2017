@@ -1,5 +1,11 @@
+# EDIT configs/default.ini TO CHANGE SETTINGS
+from config import config
+
 from dm import damerau_levenshtein_distance
 import re
+import os, errno
+import os.path
+
 class Person:
 
     testcounter = 0
@@ -54,7 +60,7 @@ def name_comparison(p1, p2) :
             fn_percentdifference = damerau_levenshtein_distance(p1.meta_fornavn, p2.meta_fornavn) / float(percent_denominator(p1.meta_fornavn,p2.meta_fornavn))
 
             # Higher weight on fornavn
-            if fn_percentdifference >= 0.15:
+            if fn_percentdifference >= config.fornavn_max_percent_difference:
                 return 2
 
             # Mellemnavn
@@ -112,10 +118,10 @@ def husdistance(peoplearr1,peoplearr2,p1,p2,husarr1,husarr2) :
          #   print "Maaaeeh " + person2.fornavn # Just to check that It actually enters the loop
             totalhusdistance += person_distance_score(person,person2)
     if(hus1size != 0) :
-        if((totalhusdistance / housedivisor) > 5) :
-            return 10
+        if((totalhusdistance / housedivisor) > config.husstand_min_weight) :
+            return config.husstand_match_points
         else :
-            return 0
+            return config.husstand_mismatch_points
 
 def housestring(peoplearr1,peoplearr2,p1,p2,husarr1,husarr2) :
     output = "   Start of New HOUSE  \n  "
@@ -160,11 +166,11 @@ def foedeaar_comparison(person1,person2) : # Enten 10 eller 0 Grov sortering
     assert isinstance(person2, Person)
 
     if (abs(person1.foedeaar == person2.foedeaar)) :
-        return 10 #man kan udvide med en variabel, der aendres med distancen imellem de to aldre
-    elif (abs(person1.foedeaar - person2.foedeaar) <= 2) :
-        return 10 - (abs(person1.foedeaar - person2.foedeaar))*2
+        return config.foedeaar_match_points #man kan udvide med en variabel, der aendres med distancen imellem de to aldre
+    elif (abs(person1.foedeaar - person2.foedeaar) <= config.foedeaar_match_points) :
+        return config.foedeaar_match_points - (abs(person1.foedeaar - person2.foedeaar))*2
     else :
-        return -100
+        return config.foedearr_mismatch_points
 
 
 # TODO apply double metaphone to inexact matching foedested
@@ -178,9 +184,9 @@ def foedested_comparison(person1, person2) : # Maks 5 else 0
     if (matchObj != None and matchObj2 != None): # Case both is some version of "heri sognet"
         if(person1.sogn == person2.sogn) :
           #  print "Both is something herisognet, so comparing sogn"
-            return 10
+            return config.foedested_sogn_match_points
         elif(person1.herred == person2.herred) :
-            return 5
+            return config.foedested_herred_match_points
 
     elif(matchObj != None and matchObj2 == None) :
        # print "person1 contains herisognet"
@@ -189,7 +195,7 @@ def foedested_comparison(person1, person2) : # Maks 5 else 0
         for p1place in person1places :
             if (p1place == person2.sogn):
                # print p1place + " matches " + person2.sogn
-                return 10
+                return config.foedested_sogn_match_points
 
     elif (matchObj == None and matchObj2 != None):
        # print "person2 contains herisognet"
@@ -197,14 +203,14 @@ def foedested_comparison(person1, person2) : # Maks 5 else 0
         for p2place in person2places:
             if (p2place == person1.sogn):
                # print p2place + " matches " + person1.sogn
-                return 10
+                return config.foedested_sogn_match_points
     else :
         if(person1.foedested == person2.foedested) :
            # print "none of the foedesteder contained sogn and matched exact"
-            return 10
+            return config.foedeaar_exact_match_points
    # print "none of the foedesteder contained sogn and didn't match so returning 0"
 
-    return 0
+    return config.foedearr_mismatch_points
 
 
 def is_overhoved(person) :
@@ -216,26 +222,26 @@ def is_overhoved(person) :
 
 def overhoved_comparison(p1,p2) :
     if(is_overhoved(p1) == is_overhoved(p2)) :
-        return 3
+        return config.overhoved_match_points
     else :
-        return 0
-
-def person_distance_score(p1, p2):
-    assert isinstance(p1, Person)
-    assert isinstance(p2, Person)
-    result = 0
-    if (name_comparison(p1, p2) <= 0.3) : # Smaller than  some percent difference
-        result = foedeaar_comparison(p1,p2) + foedested_comparison(p1,p2) + overhoved_comparison(p1,p2) + erhverv_comparison(p1,p2)
-
-    return result # Which in this case is equal to 0
+        return config.overhoved_mismatch_points
 
 def erhverv_comparison(p1,p2):
     assert isinstance(p1, Person)
     assert isinstance(p2, Person)
     if(p1.erhverv == p2.erhverv):
-        return 5
+        return config.erhverv_match_points
     else :
-        return -1
+        return config.erhverv_mismatch_points
+
+def person_distance_score(p1, p2):
+    assert isinstance(p1, Person)
+    assert isinstance(p2, Person)
+    result = config.person_distance_base_score # 0 by default
+    if (name_comparison(p1, p2) <= config.name_comparison_max_percent_difference) : # Smaller than  some percent difference
+        result = foedeaar_comparison(p1,p2) + foedested_comparison(p1,p2) + overhoved_comparison(p1,p2) + erhverv_comparison(p1,p2)
+
+    return result # Which in this case is equal to 0
 
 
 def is_match(p1,p2,limit):
@@ -245,6 +251,7 @@ def is_match(p1,p2,limit):
         return True
     else :
         return False
+
 # removes matches in the list that are lower than a certain limit. 
 def removelowmatches(limit,inputlist) : 
     output = [] 
@@ -307,6 +314,9 @@ def personstring (person) :
     output += "weight: " + str(person.weight) + "\n\n"
     return output
 
+def personstring_short (person) :
+    return str(person.fornavn) + " " + str(person.mlnavn) + " " + str(person.efternavn) + " (" + str(person.id) + ")"
+
 
 def person_array_writer(person, listi) : # person is the person we're looking for
     output = "Person we're looking for: \n --------------------\n"
@@ -316,11 +326,25 @@ def person_array_writer(person, listi) : # person is the person we're looking fo
     for p in listi :
         output += personstring(p) # p is a person
 
-    f = open(str("output/" + person.fornavn + "_" + person.mlnavn +  "_"  + person.efternavn + str(person.foedeaar) + "_" + str(person.husstands_familienr)) + "_"  + str(person.id) + ".txt", 'w')
+    file_base_name = person.fornavn + "_" + person.mlnavn +  "_"  + person.efternavn + "_" + str(person.foedeaar) + "_" + str(person.husstands_familienr) + "_"  + str(person.id)
+
+    file_house_name = file_base_name + "_house"
+
+
+    # Create output folder if it doesn't exist
+    # https://stackoverflow.com/a/273227
+    try:
+        os.makedirs(config.output_folder)
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise
+
+    f = open(os.path.join(config.output_folder, file_base_name) + ".txt", 'w')
     f.write(output)
     f.close()
+
     if(person.housestring != None) :
-        f = open(str("output/" + person.fornavn + "_" + person.mlnavn +  "_"  + person.efternavn + str(person.foedeaar) + "_" + str(person.husstands_familienr)) + "_"  + str(person.id) + "_house" + ".txt", 'w')
+        f = open(os.path.join(config.output_folder, file_house_name) + ".txt", 'w')
         f.write(person.housestring)
 
 
