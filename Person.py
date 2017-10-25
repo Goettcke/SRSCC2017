@@ -207,7 +207,7 @@ def foedested_comparison(person1, person2) : # Maks 5 else 0
     else :
         if(person1.foedested == person2.foedested) :
            # print "none of the foedesteder contained sogn and matched exact"
-            return config.foedeaar_exact_match_points
+            return config.foedested_exact_match_points
    # print "none of the foedesteder contained sogn and didn't match so returning 0"
 
     return config.foedearr_mismatch_points
