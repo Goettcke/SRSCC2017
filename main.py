@@ -19,6 +19,8 @@ from Person import *
 print "Susanne, Regina"
 #New problem seems to be that we only end up with highest valued candidates.
 
+
+
 def lookupperson(peoplelist) :
     people1845 = getData.get_people(config.f1845_filename, 1845)
     people1850 = getData.get_people(config.f1850_filename, 1850)
