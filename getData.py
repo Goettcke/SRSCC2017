@@ -5,7 +5,8 @@ from bisect import bisect_left
 from Person import *
 from Person import is_overhoved
 bad_formatted_people = []
-from metaphone import singlemetaphone
+from metaphone import *
+
 # 0 kipnr
 # 1  kilde
 # 2 sogn
@@ -109,8 +110,8 @@ def get_people(filename, year):
             p.husstands_familienr = lineSplit[10]
             p.kipnr = lineSplit[11]
             p.lbnr = lineSplit[12]
-            p.meta_fornavn = singlemetaphone(p.fornavn,1)
-            p.meta_efternavn = singlemetaphone(p.efternavn,1)
+            p.meta_fornavn = metaphone(p.fornavn)
+            p.meta_efternavn = metaphone(p.efternavn)
             p.id = pid # So all people have a unique ID
             pid += 1
             people.append(p)

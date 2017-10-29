@@ -1,14 +1,7 @@
 # -*- coding: utf-8 -*-
 
-# EDIT configs/default.ini TO CHANGE SETTINGS
-from config import config
-
-
-def singlemetaphone(text, method):  # method 1 == single, method 2 == double
+def singlemetaphone(text, method = 1):  # method 1 == single, method 2 == double
     
-    if not config.use_metaphone:
-        return text
-
     length = len(text)
     text = text.lower()
     vokaler = ['a','e','i','o','u','æ','ø','å']
@@ -158,7 +151,3 @@ def singlemetaphone(text, method):  # method 1 == single, method 2 == double
 
 
     return res
-
-
-
-
