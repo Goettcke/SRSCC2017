@@ -26,7 +26,7 @@ def lookupperson(peoplelist) :
     people1850 = getData.get_people(config.f1850_filename, 1850)
     husArr1845 = getHustande(people1845)
     husArr1850 = getHustande(people1850)
-    minlimit = 0
+    minlimit = config.person_distance_base_score
     for number in peoplelist :
         candidates = []
         person = people1845[number]
@@ -49,26 +49,26 @@ def lookupperson(peoplelist) :
         if(len(candidates) > 0) :
            # print "length of candidates" + str(len(candidates))
             for candidate in candidates:
-                if (husdistance(people1845,people1850,person,candidate,husArr1845,husArr1850) == 10) :
+                if (husdistance(people1845,people1850,person,candidate,husArr1845,husArr1850) == config.husstand_match_points) :
                     candidate.husmatch = True
                     candidate.weight += config.husmatch_weight_boost
                     person.housestring = housestring(people1845,people1850,person,candidate,husArr1845,husArr1850)
 
             candidates.sort(key=lambda x: x.weight, reverse=True)
             #person_array_iterator(candidates)
-            candidates = takeWeights(candidates)
+            candidates = takeWeights(candidates, config.max_candidates_to_include)
             person_array_writer(person, candidates)
         else :
            print "No good candidates found for " + personstring_short(person)
 
 
 
-def takeWeights (candidateList) :
+def takeWeights (candidateList, max_candidates) :
     resCandidates = []
     weightNR = 0
     for candidate in candidateList :
         currentWeight = candidate.weight
-        if (currentWeight <= 0 or weightNR > 4) :
+        if (currentWeight <= 0 or weightNR > max_candidates) :
             return resCandidates
         else :
             resCandidates.append(candidate)
