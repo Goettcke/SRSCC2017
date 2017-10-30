@@ -111,6 +111,7 @@ def get_people(filename, year):
             p.kipnr = lineSplit[11]
             p.lbnr = lineSplit[12]
             p.meta_fornavn = metaphone(p.fornavn)
+            p.meta_mlnavn = metaphone(p.mlnavn)
             p.meta_efternavn = metaphone(p.efternavn)
             p.id = pid # So all people have a unique ID
             pid += 1

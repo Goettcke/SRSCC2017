@@ -40,3 +40,14 @@ def damerau_levenshtein_distance(s1, s2):
         da[s1[i - 1]] = i
 
     return score[len1 + 1][len2 + 1]
+
+
+def percent_denominator(navn1,navn2):
+    denominator = float(max(len(navn1), len(navn2)))
+    if (denominator != 0):
+        return denominator
+    else :
+        return 1 # To ensure we're not deviding by 0
+
+def percent_levenstein(navn1, navn2):
+    return damerau_levenshtein_distance(navn1, navn2) / float(percent_denominator(navn1, navn2))

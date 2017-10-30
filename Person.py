@@ -1,7 +1,7 @@
 # EDIT configs/default.ini TO CHANGE SETTINGS
 from config import config
 
-from dm import damerau_levenshtein_distance
+from dm import *
 import re
 import os, errno
 import os.path
@@ -28,6 +28,7 @@ class Person:
         self.mlnavn = str() # dm uden metaphone
         self.efternavn = str() #dmld metaphone
         self.meta_fornavn = str()  # dmld metaphone
+        self.meta_mlnavn = str()  # dmld metaphone
         self.meta_efternavn = str()  # dmld metaphone
         #self.kon = bool()
         self.koen = str() # "k" or "m"
@@ -57,17 +58,17 @@ def name_comparison(p1, p2) :
     if(len(p1.meta_efternavn) > 0 and len(p2.meta_efternavn) > 0 and len(p1.meta_fornavn) > 0 and len(p2.meta_fornavn) > 0 ):
         if(p1.meta_fornavn[0] == p2.meta_fornavn[0] and p1.meta_efternavn[0] == p2.meta_efternavn[0]) :
             # Fornavn
-            fn_percentdifference = damerau_levenshtein_distance(p1.meta_fornavn, p2.meta_fornavn) / float(percent_denominator(p1.meta_fornavn,p2.meta_fornavn))
+            fn_percentdifference = percent_levenstein(p1.meta_fornavn, p2.meta_fornavn)
 
             # Higher weight on fornavn
             if fn_percentdifference >= config.fornavn_max_percent_difference:
                 return 2
 
             # Mellemnavn
-            ml_percentdifference = damerau_levenshtein_distance(p1.mlnavn, p2.mlnavn) / float(percent_denominator(p1.mlnavn,p2.mlnavn))
+            ml_percentdifference = percent_levenstein(p1.meta_mlnavn, p2.meta_mlnavn)
 
             # Efternavn
-            en_percentdifference = damerau_levenshtein_distance(p1.meta_efternavn, p2.meta_efternavn) / float(percent_denominator(p1.meta_efternavn,p2.meta_efternavn))
+            en_percentdifference = percent_levenstein(p1.meta_efternavn, p2.meta_efternavn)
 
             result = fn_percentdifference + ml_percentdifference + en_percentdifference
 
@@ -151,12 +152,6 @@ def housestring(peoplearr1,peoplearr2,p1,p2,husarr1,husarr2) :
     output += "   End of New HOUSE  \n  "
     return output
 
-def percent_denominator(navn1,navn2):
-    denominator = float(max(len(navn1), len(navn2)))
-    if (denominator != 0):
-        return denominator
-    else :
-        return 1 # To ensure we're not deviding by 0
 
 
     #Saa koerer vi dobbelt metaphonoe
@@ -307,6 +302,7 @@ def personstring (person) :
     output += "amt: " + str(person.amt) + "\n"
     output += "husstandsfamilienr: " + str(person.husstands_familienr) + "\n"
     output += "meta_fornavn: " + "'" + str(person.meta_fornavn) +"'" + "\n"
+    output += "meta_mlnavn: " + "'" + str(person.meta_mlnavn) +"'" + "\n"
     output += "meta_efternavn: " + "'" + str(person.meta_efternavn) + "'"  + "\n"
     output += "koen: " + str(person.koen) + "\n"
     output += "civilstand: " + str(person.civilstand) + "\n"
