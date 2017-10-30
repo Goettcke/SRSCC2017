@@ -322,7 +322,14 @@ def person_array_writer(person, listi) : # person is the person we're looking fo
     for p in listi :
         output += personstring(p) # p is a person
 
-    file_base_name = person.fornavn + "_" + person.mlnavn +  "_"  + person.efternavn + "_" + str(person.foedeaar) + "_" + str(person.husstands_familienr) + "_"  + str(person.id)
+    mlnavn_list = person.mlnavn.split(" ")
+    if len(mlnavn_list) == 1 and mlnavn_list[0] == "":
+        mlnavn_list = []
+
+    file_base_name = "_".join([
+        person.fornavn] + mlnavn_list + [person.efternavn, 
+        str(person.foedeaar), str(person.husstands_familienr), str(person.id)
+    ])
 
     file_house_name = file_base_name + "_house"
 

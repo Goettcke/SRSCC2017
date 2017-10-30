@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 from .word import Word
 
 VOWELS = ['A', 'E', 'I', 'O', 'U', 'Y', "Æ", "Ø", "Å"]
-SILENT_STARTERS = ["GN", "KN", "PN", "WR", "PS"]
+SILENT_STARTERS = ["HJ", "HV"]
 
 
 class DoubleMetaphone(object):
