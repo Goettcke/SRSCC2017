@@ -13,19 +13,19 @@ def damerau_levenshtein_distance(s1, s2):
     da = collections.defaultdict(int)
 
     # distance matrix
-    score = [[0] * (len2 + 2) for x in range(len1 + 2)]
+    score = [[0] * (len2 + 2) for x in xrange(len1 + 2)]
 
     score[0][0] = infinite
-    for i in range(0, len1 + 1):
+    for i in xrange(0, len1 + 1):
         score[i + 1][0] = infinite
         score[i + 1][1] = i
-    for i in range(0, len2 + 1):
+    for i in xrange(0, len2 + 1):
         score[0][i + 1] = infinite
         score[1][i + 1] = i
 
-    for i in range(1, len1 + 1):
+    for i in xrange(1, len1 + 1):
         db = 0
-        for j in range(1, len2 + 1):
+        for j in xrange(1, len2 + 1):
             i1 = da[s2[j - 1]]
             j1 = db
             cost = 1

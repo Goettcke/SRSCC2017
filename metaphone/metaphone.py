@@ -7,6 +7,10 @@ from .singlemetaphone import *
 from .doublemetaphone import *
 
 
+class UnknownMetaphoneAlg(Exception):
+    pass
+
+
 def metaphone(s):
     # A helper that uses the config to determine what metaphone algorithm to use.
 
@@ -18,3 +22,6 @@ def metaphone(s):
     elif config.use_metaphone_alg == "double":
         pair = doublemetaphone(s)
         return pair[0]
+
+    # If we don't recognize metaphone algorithm, throw an exception.
+    raise UnknownMetaphoneAlg("Did not recognize metaphone algoritm '%s'" % config.use_metaphone_alg)

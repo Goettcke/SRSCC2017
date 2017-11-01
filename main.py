@@ -97,22 +97,22 @@ if __name__ == '__main__':
     intervals = []
     counter = lowbound
     limit = 20
-    for i in range(threads) :
+    for i in xrange(threads) :
         personnumbers = []
         if(i != threads - 1) :
-            for j in range(counter,counter+peopleperthread) :
+            for j in xrange(counter,counter+peopleperthread) :
                 personnumbers.append(j)
                 counter = counter + 1
             intervals.append(personnumbers)
         else :
-            for j in range(counter,counter+peopleperthread+excess) :
+            for j in xrange(counter,counter+peopleperthread+excess) :
                 personnumbers.append(j)
                 counter = counter + 1
             intervals.append(personnumbers)
 
     print intervals
     procs = []
-    for i in range(threads):
+    for i in xrange(threads):
         proc = Process(target=lookupperson, args=(intervals[i],))
         procs.append(proc)
         proc.start()

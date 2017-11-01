@@ -108,9 +108,9 @@ def husdistance(peoplearr1,peoplearr2,p1,p2,husarr1,husarr2) :
     else :
         housedivisor = min(hus1size,hus2size)
 
-    for i in range(hus1size) :
+    for i in xrange(hus1size) :
         peopleinhouse1.append(peoplearr1[husarr1[p1.hustandsindex][i]])
-    for i in range(hus2size) :
+    for i in xrange(hus2size) :
         peopleinhouse2.append(peoplearr2[husarr2[p2.hustandsindex][i]])
 
     for person in peopleinhouse1 :
@@ -131,10 +131,10 @@ def housestring(peoplearr1,peoplearr2,p1,p2,husarr1,husarr2) :
     peopleinhouse1 = []
     peopleinhouse2 = []
 
-    for i in range(hus1size) :
+    for i in xrange(hus1size) :
         peopleinhouse1.append(peoplearr1[husarr1[p1.hustandsindex][i]])
 
-    for i in range(hus2size) :
+    for i in xrange(hus2size) :
         peopleinhouse2.append(peoplearr2[husarr2[p2.hustandsindex][i]])
 
     output += " ------- Start house1 --------- \n"
