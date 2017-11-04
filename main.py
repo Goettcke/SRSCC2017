@@ -102,7 +102,7 @@ if __name__ == '__main__':
             raise
     
     # Copy config file inside output-folder so we know what parameters it was run with.
-    shutil.copyfile(config.filename, os.path.join(config.output_folder, "parameters.ini"))
+    shutil.copyfile(config.filename, os.path.join(config.output_folder, "_parameters.ini"))
 
 
     # Start threads
