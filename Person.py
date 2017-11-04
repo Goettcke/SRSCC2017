@@ -5,6 +5,7 @@ from dm import *
 import re
 import os, errno
 import os.path
+import copy
 
 class Person:
 
@@ -49,30 +50,48 @@ class Person:
         self.husmatch = bool()
         self.housestring = str()
 
+    def copy(self):
+        return copy.deepcopy(self)
+
 
 # TODO Apply Double Metaphone to inexact names.
 def name_comparison(p1, p2) :
     assert isinstance(p1, Person)
     assert isinstance(p2, Person)
 
-    if(len(p1.meta_efternavn) > 0 and len(p2.meta_efternavn) > 0 and len(p1.meta_fornavn) > 0 and len(p2.meta_fornavn) > 0 ):
-        if(p1.meta_fornavn[0] == p2.meta_fornavn[0] and p1.meta_efternavn[0] == p2.meta_efternavn[0]) :
-            # Fornavn
-            fn_percentdifference = percent_levenstein(p1.meta_fornavn, p2.meta_fornavn)
+    if config.name_comparison_method == "old":
+        if(len(p1.meta_efternavn) > 0 and len(p2.meta_efternavn) > 0 and \
+           len(p1.meta_fornavn) > 0 and len(p2.meta_fornavn) > 0 ):
 
-            # Higher weight on fornavn
-            if fn_percentdifference >= config.fornavn_max_percent_difference:
-                return 2
+            # Focus on the first letters of fornavn and efternavn first. If they don't match, don't bother.
+            if(p1.meta_fornavn[0] == p2.meta_fornavn[0] and p1.meta_efternavn[0] == p2.meta_efternavn[0]) :
+                # Fornavn
+                fn_percentdifference = percent_levenshtein_helper(p1.meta_fornavn, p2.meta_fornavn)
 
-            # Mellemnavn
-            ml_percentdifference = percent_levenstein(p1.meta_mlnavn, p2.meta_mlnavn)
+                # Higher weight on fornavn
+                if fn_percentdifference >= config.fornavn_max_percent_difference:
+                    return 2
 
-            # Efternavn
-            en_percentdifference = percent_levenstein(p1.meta_efternavn, p2.meta_efternavn)
+                # Mellemnavn
+                ml_percentdifference = percent_levenshtein_helper(p1.meta_mlnavn, p2.meta_mlnavn)
 
-            result = fn_percentdifference + ml_percentdifference + en_percentdifference
+                # Efternavn
+                en_percentdifference = percent_levenshtein_helper(p1.meta_efternavn, p2.meta_efternavn)
 
-            return result / 3
+                result = fn_percentdifference + ml_percentdifference + en_percentdifference
+
+                return result / 3
+    elif config.name_comparison_method == "new":
+        # Fornavne
+        fne_percentdifference = percent_levenshtein_helper(p1.meta_fornavne, p2.meta_fornavne)
+
+        # Efternavn
+        en_percentdifference = percent_levenshtein_helper(p1.meta_efternavn, p2.meta_efternavn)
+
+        result = fne_percentdifference + en_percentdifference
+
+        return result
+
 
     return 2 # 100% mismatch
 
@@ -200,9 +219,13 @@ def foedested_comparison(person1, person2) : # Maks 5 else 0
                # print p2place + " matches " + person1.sogn
                 return config.foedested_sogn_match_points
     else :
-        if(person1.foedested == person2.foedested) :
-           # print "none of the foedesteder contained sogn and matched exact"
-            return config.foedested_exact_match_points
+        if config.foedested_use_metaphone:
+            if person1.meta_foedested == person2.meta_foedested:
+                return config.foedested_exact_match_points
+        else:
+            if(person1.foedested == person2.foedested) :
+               # print "none of the foedesteder contained sogn and matched exact"
+                return config.foedested_exact_match_points
    # print "none of the foedesteder contained sogn and didn't match so returning 0"
 
     return config.foedearr_mismatch_points
@@ -232,9 +255,33 @@ def erhverv_comparison(p1,p2):
 def person_distance_score(p1, p2):
     assert isinstance(p1, Person)
     assert isinstance(p2, Person)
+
     result = config.person_distance_base_score # 0 by default
-    if (name_comparison(p1, p2) <= config.name_comparison_max_percent_difference) : # Smaller than  some percent difference
-        result = foedeaar_comparison(p1,p2) + foedested_comparison(p1,p2) + overhoved_comparison(p1,p2) + erhverv_comparison(p1,p2)
+
+    name_comparison_diff = name_comparison(p1, p2)
+
+    if (name_comparison_diff <= config.name_comparison_max_percent_difference) : 
+        result += foedeaar_comparison(p1,p2) 
+        result += foedested_comparison(p1,p2) 
+        result += overhoved_comparison(p1,p2) 
+        result += erhverv_comparison(p1,p2)
+
+        if config.use_name_comparison_boost:
+            # The name difference will be between 0.0 and config.name_comparison_max_percentage_difference,
+            # commonly between 0.0 and 0.3. 
+            # First interpolate this into a 0.0-1.0 scale.
+            interpolated_diff = interpolate(
+                name_comparison_diff, 
+                0.0, config.name_comparison_max_percent_difference, 
+                0.0, 1.0
+            )
+            # If the diff is very small, e.g. close to 0, we should give full points.
+            # If the diff is very big, e.g. close to 1, we should give no points.
+            # So we take 1 - diff to get this effect.
+            # Finally we scale with a factor so it can be between 0 to 100 or 0 to 10 if we want.
+            result += int((1 - interpolated_diff)*config.name_comparison_boost_scale)
+
+        p1.name_comparison_diff = name_comparison_diff
 
     return result # Which in this case is equal to 0
 
@@ -262,6 +309,17 @@ def findminlimit(inputlist) :
         if(person.weight < limit) : 
             limit = person.weight
     return limit
+
+def interpolate(value, leftMin, leftMax, rightMin, rightMax):
+    # Figure out how 'wide' each range is
+    leftSpan = leftMax - leftMin
+    rightSpan = rightMax - rightMin
+
+    # Convert the left range into a 0-1 range (float)
+    valueScaled = float(value - leftMin) / float(leftSpan)
+
+    # Convert the 0-1 range into a value in the right range.
+    return rightMin + (valueScaled * rightSpan)
 
 def person_print_information(p1):
     assert isinstance(p1, Person)
@@ -304,9 +362,16 @@ def personstring (person) :
     output += "meta_fornavn: " + "'" + str(person.meta_fornavn) +"'" + "\n"
     output += "meta_mlnavn: " + "'" + str(person.meta_mlnavn) +"'" + "\n"
     output += "meta_efternavn: " + "'" + str(person.meta_efternavn) + "'"  + "\n"
+    output += "meta_fornavne: " + "'" + str(person.meta_fornavne) + "'"  + "\n"
     output += "koen: " + str(person.koen) + "\n"
     output += "civilstand: " + str(person.civilstand) + "\n"
     output += "navnsplit: " + str(person.navnsplit) + "\n"
+    output += "fornavne: " + "'" + str(person.fornavne) +"'" + "\n"
+    output += "meta_foedested: " + "'" + str(person.meta_foedested) +"'" + "\n"
+    try:
+        output += "name_comparison_diff: " + str(person.name_comparison_diff) + "\n"
+    except AttributeError:
+        pass
     output += "weight: " + str(person.weight) + "\n\n"
     return output
 
@@ -333,14 +398,6 @@ def person_array_writer(person, listi) : # person is the person we're looking fo
 
     file_house_name = file_base_name + "_house"
 
-
-    # Create output folder if it doesn't exist
-    # https://stackoverflow.com/a/273227
-    try:
-        os.makedirs(config.output_folder)
-    except OSError as e:
-        if e.errno != errno.EEXIST:
-            raise
 
     f = open(os.path.join(config.output_folder, file_base_name) + ".txt", 'w')
     f.write(output)

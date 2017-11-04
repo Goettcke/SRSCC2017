@@ -38,6 +38,8 @@ class Config(object):
         self.config_handler = ConfigParser()
 
     def init(self, filename):
+        self.filename = filename
+
         if len(self.config_handler.sections()) == 0:
             self.config_handler.read(filename)
 

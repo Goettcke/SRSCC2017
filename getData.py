@@ -1,3 +1,6 @@
+# EDIT configs/default.ini TO CHANGE SETTINGS
+from config import config
+
 import re
 
 from bisect import bisect_left
@@ -60,17 +63,28 @@ def get_people(filename, year):
     people = []
     pid = 0
     for line in fo:
+
+        if line.startswith("amt|herred"):
+            # Ignore the header
+            continue
+
         lineSplit = line.split("|")
         #print line
         #print len(lineSplit)
         if (len(lineSplit)  == 13) :
             p = Person(year)
+
             p.amt = lineSplit[0]
             p.herred = lineSplit[1]
             p.sogn = lineSplit[2]
+
             navn_split = lineSplit[3].split(" ")
-            p.fornavn = navn_split[0]
             p.navnsplit = navn_split
+
+            #assert len(navn_split) >= 2, (navn_split, pid)
+
+
+            p.fornavn = navn_split[0]
 
             if (len(navn_split) > 2) :
                 for i in xrange(1,len(navn_split)-1,1):
@@ -86,6 +100,13 @@ def get_people(filename, year):
             else :
                 p.efternavn = navn_split[-1]
 
+
+            p.fornavne_list = navn_split[:-1]
+            if config.sort_fornavne:
+                p.fornavne_list.sort()
+            p.fornavne = " ".join(p.fornavne_list)
+
+
             p.koen = lineSplit[4]
 
             """ 
@@ -97,6 +118,12 @@ def get_people(filename, year):
                 p.foedested = lineSplit[5]
             """
             p.foedested = lineSplit[5]
+
+            if config.foedested_use_metaphone:
+                p.meta_foedested = metaphone(p.foedested)
+            else:
+                p.meta_foedested = p.foedested
+
 
             if(is_number(lineSplit[6])) :
                 p.foedeaar = int(lineSplit[6])
@@ -110,9 +137,20 @@ def get_people(filename, year):
             p.husstands_familienr = lineSplit[10]
             p.kipnr = lineSplit[11]
             p.lbnr = lineSplit[12]
-            p.meta_fornavn = metaphone(p.fornavn)
-            p.meta_mlnavn = metaphone(p.mlnavn)
-            p.meta_efternavn = metaphone(p.efternavn)
+
+            if config.name_use_metaphone:
+                p.meta_fornavn   = metaphone(p.fornavn)
+                p.meta_mlnavn    = metaphone(p.mlnavn)
+                p.meta_efternavn = metaphone(p.efternavn)
+                p.meta_fornavne  = metaphone(p.fornavne)
+            else:
+                p.meta_fornavn   = p.fornavn
+                p.meta_mlnavn    = p.mlnavn
+                p.meta_efternavn = p.efternavn
+                p.meta_fornavne  = p.fornavne
+
+
+
             p.id = pid # So all people have a unique ID
             pid += 1
             people.append(p)

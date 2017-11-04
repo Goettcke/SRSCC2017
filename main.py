@@ -4,6 +4,7 @@
 from config import config
 
 import os.path
+import shutil
 import getData
 import sys
 from multiprocessing import  Process
@@ -36,7 +37,7 @@ def lookupperson(peoplelist) :
             if(person.koen == people1850[i].koen) :
                 persondistance = person_distance_score(people1850[i], person)
                 if (persondistance > minlimit):
-                    p = people1850[i]
+                    p = people1850[i].copy()
                     p.weight = persondistance
                     """
                     candidates = removelowmatches(minlimit, candidates)
@@ -91,6 +92,20 @@ if __name__ == '__main__':
 
     config.init(os.path.join("configs", config_filename))
 
+
+    # Create output folder if it doesn't exist
+    # https://stackoverflow.com/a/273227
+    try:
+        os.makedirs(config.output_folder)
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise
+    
+    # Copy config file inside output-folder so we know what parameters it was run with.
+    shutil.copyfile(config.filename, os.path.join(config.output_folder, "parameters.ini"))
+
+
+    # Start threads
     peopleperthread = (highbound-lowbound)/threads
     excess = (highbound-lowbound) - peopleperthread*threads
 

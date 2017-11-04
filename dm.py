@@ -1,3 +1,6 @@
+# EDIT configs/default.ini TO CHANGE SETTINGS
+from config import config
+
 import collections
 
 _no_bytes_err = 'expected str, got bytes'
@@ -49,5 +52,16 @@ def percent_denominator(navn1,navn2):
     else :
         return 1 # To ensure we're not deviding by 0
 
-def percent_levenstein(navn1, navn2):
+def percent_levenshtein(navn1, navn2):
     return damerau_levenshtein_distance(navn1, navn2) / float(percent_denominator(navn1, navn2))
+
+def percent_levenshtein_helper(navn1, navn2):
+    if config.name_use_levenshtein:
+        return percent_levenshtein(navn1, navn2)
+    else:
+        # If we don't use levenshtein, a exact match will have difference of 0 % 
+        # and otherwise, it will have 100% difference.
+        if navn1 == navn2:
+            return 0.0
+        else:
+            return 1.0

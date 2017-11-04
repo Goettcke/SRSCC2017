@@ -11,15 +11,13 @@ class UnknownMetaphoneAlg(Exception):
     pass
 
 
-def metaphone(s):
-    # A helper that uses the config to determine what metaphone algorithm to use.
+def metaphone(s, alg = None):
+    if alg == None:
+        alg = config.use_metaphone_alg
 
-    if not config.use_metaphone:
-        return s
-
-    if config.use_metaphone_alg == "single":
+    if alg == "single":
         return singlemetaphone(s)
-    elif config.use_metaphone_alg == "double":
+    elif alg == "double":
         pair = doublemetaphone(s)
         return pair[0]
 
