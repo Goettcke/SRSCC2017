@@ -119,11 +119,7 @@ def get_people(filename, year):
                 p.foedested = lineSplit[5]
             """
             p.foedested = lineSplit[5]
-
-            if config.foedested_use_metaphone:
-                p.meta_foedested = metaphone(p.foedested)
-            else:
-                p.meta_foedested = p.foedested
+            p.meta_foedested = metaphone(p.foedested)
 
 
             if(is_number(lineSplit[6])) :

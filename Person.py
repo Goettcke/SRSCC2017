@@ -200,36 +200,35 @@ def foedeaar_comparison(person1,person2) : # Enten 10 eller 0 Grov sortering
         return config.foedeaar_mismatch_points
 
 
-# TODO apply double metaphone to inexact matching foedested
-def foedested_comparison(person1, person2) : # Maks 5 else 0
+def foedested_comparison(person1, person2) : 
     assert isinstance(person1, Person)
     assert isinstance(person2, Person)
     #print "Foedested_comparison"
-    matchObj = re.match(r'(.*)sogn(.*)',person1.foedested)
-    matchObj2 = re.match(r'(.*)sogn(.*)',person2.foedested)
+    pattern = r"sognet"
+    matchObj = re.match(r'(.*)' + pattern + r'(.*)',person1.foedested)
+    matchObj2 = re.match(r'(.*)' + pattern + r'(.*)',person2.foedested)
 
     if (matchObj != None and matchObj2 != None): # Case both is some version of "heri sognet"
         if(person1.sogn == person2.sogn) :
-          #  print "Both is something herisognet, so comparing sogn"
+            # Both is something herisognet, so comparing sogn
             return config.foedested_sogn_match_points
         elif(person1.herred == person2.herred) :
             return config.foedested_herred_match_points
+        elif(person1.amt == person2.amt) :
+            return config.foedested_amt_match_points
 
     elif(matchObj != None and matchObj2 == None) :
-       # print "person1 contains herisognet"
-        person1places = [person1.amt,person1.herred,person1.sogn]
-     #   print person1places
+        person1places = [person1.amt, person1.herred, person1.sogn]
+
         for p1place in person1places :
             if (p1place == person2.sogn):
-               # print p1place + " matches " + person2.sogn
                 return config.foedested_sogn_match_points
 
     elif (matchObj == None and matchObj2 != None):
-       # print "person2 contains herisognet"
         person2places = [person2.amt, person2.herred, person2.sogn]
+
         for p2place in person2places:
             if (p2place == person1.sogn):
-               # print p2place + " matches " + person1.sogn
                 return config.foedested_sogn_match_points
     else :
         if config.foedested_use_metaphone:
@@ -237,7 +236,6 @@ def foedested_comparison(person1, person2) : # Maks 5 else 0
                 return config.foedested_exact_match_points
         else:
             if(person1.foedested == person2.foedested) :
-               # print "none of the foedesteder contained sogn and matched exact"
                 return config.foedested_exact_match_points
    # print "none of the foedesteder contained sogn and didn't match so returning 0"
 
