@@ -18,6 +18,10 @@ from Person import *
 
 
 def lookupperson(peoplelist) :
+    if len(peoplelist) == 0:
+        print("Thread of empty interval ended.")
+        return
+
     people1845 = getData.get_people(config.f1845_filename, 1845)
     people1850 = getData.get_people(config.f1850_filename, 1850)
 
@@ -26,13 +30,19 @@ def lookupperson(peoplelist) :
 
     minlimit = config.person_distance_base_score
 
+    count = 0
     count_no_matches = 0
+    status_freq = config.status_frequency
 
     for number in peoplelist :
         candidates = []
         person = people1845[number]
         #print "Looking for"
         #person_print_information(person)
+
+        if count % status_freq == 0:
+            print("Status: Currently at " + personstring_short(person))
+
         for i in xrange (0,len(people1850)):
             if(person.koen == people1850[i].koen) :
                 persondistance = person_distance_score(people1850[i], person)
@@ -63,19 +73,18 @@ def lookupperson(peoplelist) :
            print "No good candidates found for " + personstring_short(person)
            count_no_matches += 1
 
-    count_has_matches = len(peoplelist) - count_no_matches
-    percent = (count_has_matches / float(len(peoplelist))) * 100
+        count += 1
+
+    count_has_matches = count - count_no_matches
+    percent = (count_has_matches / float(count)) * 100
     
     print("Status:")
-    print("  People considered:      %d" % len(peoplelist))
+    print("  People considered:      %d" % count)
     print("  People with matches:    %d" % count_has_matches)
     print("  People without matches: %d" % count_no_matches)
     print("  Percentage matched:     %.1f %%" % percent)
 
-    if len(peoplelist) > 0:
-        print("Thread %d-%d ended." % (peoplelist[0], peoplelist[-1])) 
-    else:
-        print("Thread of empty interval ended.")
+    print("Thread %d-%d ended." % (peoplelist[0], peoplelist[-1])) 
 
 
 
