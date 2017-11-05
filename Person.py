@@ -363,6 +363,7 @@ def person_array_iterator(listi) :
 
 def personstring (person) :
     output = "navn: " + str(person.fornavn) + " " + str(person.mlnavn) + " " + str(person.efternavn) + "\n"
+    output += "id: " + str(person.id) + "\n"
     output += "foedested: " + str(person.foedested) + "\n"
     output += "foedeaar: " + str(person.foedeaar) + "\n"
     output += "is overhoved: " + str(is_overhoved(person)) + "\n"
