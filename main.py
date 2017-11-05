@@ -8,12 +8,11 @@ import shutil
 import getData
 import sys
 from multiprocessing import  Process
-from dataSplitter import *
 from dm import damerau_levenshtein_distance
 from getData import getHustande
 from metaphone import singlemetaphone
-from converter import danishcharacterconverter
-from Person import Person, foedested_comparison, foedeaar_comparison
+#from converter import danishcharacterconverter
+#from dataSplitter import *
 from Person import *
 
 
@@ -61,6 +60,11 @@ def lookupperson(peoplelist) :
             person_array_writer(person, candidates)
         else :
            print "No good candidates found for " + personstring_short(person)
+    
+    if len(peoplelist) > 0:
+        print("Thread %d-%d ended." % (peoplelist[0], peoplelist[-1])) 
+    else:
+        print("Thread of empty interval ended.")
 
 
 
@@ -134,6 +138,8 @@ if __name__ == '__main__':
 
     for proc in procs:
         proc.join()
+
+    print("All threads ended.")
 
 
 """
