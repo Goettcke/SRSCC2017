@@ -104,7 +104,8 @@ def get_people(filename, year):
             p.fornavne_list = navn_split[:-1]
             if config.sort_fornavne:
                 p.fornavne_list.sort()
-            p.fornavne = " ".join(p.fornavne_list)
+            if config.name_use_metaphone:
+                p.fornavne_list = map(metaphone, p.fornavne_list)
 
 
             p.koen = lineSplit[4]
@@ -142,12 +143,10 @@ def get_people(filename, year):
                 p.meta_fornavn   = metaphone(p.fornavn)
                 p.meta_mlnavn    = metaphone(p.mlnavn)
                 p.meta_efternavn = metaphone(p.efternavn)
-                p.meta_fornavne  = metaphone(p.fornavne)
             else:
                 p.meta_fornavn   = p.fornavn
                 p.meta_mlnavn    = p.mlnavn
                 p.meta_efternavn = p.efternavn
-                p.meta_fornavne  = p.fornavne
 
 
 

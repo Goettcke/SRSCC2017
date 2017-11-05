@@ -50,7 +50,7 @@ def percent_denominator(navn1,navn2):
     if (denominator != 0):
         return denominator
     else :
-        return 1 # To ensure we're not deviding by 0
+        return 1.0 # To ensure we're not deviding by 0
 
 def percent_levenshtein(navn1, navn2):
     return damerau_levenshtein_distance(navn1, navn2) / float(percent_denominator(navn1, navn2))

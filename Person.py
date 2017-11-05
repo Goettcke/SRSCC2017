@@ -6,6 +6,7 @@ import re
 import os, errno
 import os.path
 import copy
+import itertools
 
 class Person:
 
@@ -54,7 +55,6 @@ class Person:
         return copy.deepcopy(self)
 
 
-# TODO Apply Double Metaphone to inexact names.
 def name_comparison(p1, p2) :
     assert isinstance(p1, Person)
     assert isinstance(p2, Person)
@@ -82,15 +82,19 @@ def name_comparison(p1, p2) :
 
                 return result / 3
     elif config.name_comparison_method == "sort-fornavne":
-        # Fornavne
-        fne_percentdifference = percent_levenshtein_helper(p1.meta_fornavne, p2.meta_fornavne)
+        count = 0
+        percent_diff = 0
+        
+        for (fornavn1, fornavn2) in itertools.izip_longest(p1.fornavne_list, p2.fornavne_list, fillvalue=""):
+            percent_diff += percent_levenshtein_helper(fornavn1, fornavn2)
+            if fornavn1 != "" and fornavn2 != "":
+                # Only count this fornavn comparison if one of the names actually exists
+                count += 1
 
-        # Efternavn
-        en_percentdifference = percent_levenshtein_helper(p1.meta_efternavn, p2.meta_efternavn)
+        percent_diff += percent_levenshtein_helper(p1.meta_efternavn, p2.meta_efternavn)
+        count += 1
 
-        result = fne_percentdifference + en_percentdifference
-
-        return result
+        return percent_diff / count
 
 
     return 2 # 100% mismatch
@@ -179,12 +183,21 @@ def foedeaar_comparison(person1,person2) : # Enten 10 eller 0 Grov sortering
     assert isinstance(person1, Person)
     assert isinstance(person2, Person)
 
-    if (abs(person1.foedeaar == person2.foedeaar)) :
-        return config.foedeaar_match_points #man kan udvide med en variabel, der aendres med distancen imellem de to aldre
-    elif (abs(person1.foedeaar - person2.foedeaar) <= config.foedeaar_match_points) :
-        return config.foedeaar_match_points - (abs(person1.foedeaar - person2.foedeaar))*2
-    else :
-        return config.foedearr_mismatch_points
+    age_diff = abs(person1.foedeaar - person2.foedeaar)
+
+    if age_diff == 0:
+        return config.foedeaar_match_points
+    elif age_diff <= config.foedeaar_max_difference:
+        # Take the age difference between 0 and 2
+        # and map into 10 and 0 (in that order, so an age diff of 0 gives 10 points).
+        interpolate_score = interpolate(
+            age_diff,
+            0, config.foedeaar_max_difference,
+            config.foedeaar_match_points, 0
+        )
+        return interpolate_score
+    else:
+        return config.foedeaar_mismatch_points
 
 
 # TODO apply double metaphone to inexact matching foedested
@@ -228,7 +241,7 @@ def foedested_comparison(person1, person2) : # Maks 5 else 0
                 return config.foedested_exact_match_points
    # print "none of the foedesteder contained sogn and didn't match so returning 0"
 
-    return config.foedearr_mismatch_points
+    return config.foedested_mismatch_points
 
 
 def is_overhoved(person) :
@@ -362,11 +375,10 @@ def personstring (person) :
     output += "meta_fornavn: " + "'" + str(person.meta_fornavn) +"'" + "\n"
     output += "meta_mlnavn: " + "'" + str(person.meta_mlnavn) +"'" + "\n"
     output += "meta_efternavn: " + "'" + str(person.meta_efternavn) + "'"  + "\n"
-    output += "meta_fornavne: " + "'" + str(person.meta_fornavne) + "'"  + "\n"
     output += "koen: " + str(person.koen) + "\n"
     output += "civilstand: " + str(person.civilstand) + "\n"
     output += "navnsplit: " + str(person.navnsplit) + "\n"
-    output += "fornavne: " + "'" + str(person.fornavne) +"'" + "\n"
+    output += "fornavne_list: " + str(person.fornavne_list) + "\n"
     output += "meta_foedested: " + "'" + str(person.meta_foedested) +"'" + "\n"
     try:
         output += "name_comparison_diff: " + str(person.name_comparison_diff) + "\n"

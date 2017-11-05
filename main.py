@@ -24,9 +24,14 @@ print "Susanne, Regina"
 def lookupperson(peoplelist) :
     people1845 = getData.get_people(config.f1845_filename, 1845)
     people1850 = getData.get_people(config.f1850_filename, 1850)
+
     husArr1845 = getHustande(people1845)
     husArr1850 = getHustande(people1850)
+
     minlimit = config.person_distance_base_score
+
+    count_no_matches = 0
+
     for number in peoplelist :
         candidates = []
         person = people1845[number]
@@ -60,11 +65,22 @@ def lookupperson(peoplelist) :
             person_array_writer(person, candidates)
         else :
            print "No good candidates found for " + personstring_short(person)
+           count_no_matches += 1
+
+    count_has_matches = len(peoplelist) - count_no_matches
+    percent = (count_has_matches / float(len(peoplelist))) * 100
     
+    print("Status:")
+    print("  People considered:      %d" % len(peoplelist))
+    print("  People with matches:    %d" % count_has_matches)
+    print("  People without matches: %d" % count_no_matches)
+    print("  Percentage matched:     %.1f %%" % percent)
+
     if len(peoplelist) > 0:
         print("Thread %d-%d ended." % (peoplelist[0], peoplelist[-1])) 
     else:
         print("Thread of empty interval ended.")
+
 
 
 
