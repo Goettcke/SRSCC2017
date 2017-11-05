@@ -81,7 +81,7 @@ def name_comparison(p1, p2) :
                 result = fn_percentdifference + ml_percentdifference + en_percentdifference
 
                 return result / 3
-    elif config.name_comparison_method == "new":
+    elif config.name_comparison_method == "sort-fornavne":
         # Fornavne
         fne_percentdifference = percent_levenshtein_helper(p1.meta_fornavne, p2.meta_fornavne)
 

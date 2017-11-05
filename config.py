@@ -37,11 +37,12 @@ class Config(object):
         self.section_name = "config"
         self.config_handler = ConfigParser()
 
-    def init(self, filename):
-        self.filename = filename
+    def init(self, *filenames):
+        self.filenames = filenames
 
         if len(self.config_handler.sections()) == 0:
-            self.config_handler.read(filename)
+            for filename in filenames:
+                self.config_handler.read(filename)
 
             # Load all values from the config file over as attributes of the object.
             for (key, val_raw) in self.config_handler.items(self.section_name):

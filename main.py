@@ -89,12 +89,18 @@ if __name__ == '__main__':
     highbound = int(sys.argv[2])
     threads = int(sys.argv[3])
 
-    if len(sys.argv) >= 5:
-        config_filename = sys.argv[4]
-    else:
-        config_filename = "default.ini"
+    default_config_filename = "default.ini"
 
-    config.init(os.path.join("configs", config_filename))
+    def c(filename):
+        return os.path.join("configs", filename)
+
+    # Initialize the config object.
+    # We read a base config file and if given another config file as argument
+    # we load that as well which will override some of the values.
+    if len(sys.argv) >= 5:
+        config.init(c(default_config_filename), c(sys.argv[4]))
+    else:
+        config.init(c(default_config_filename))
 
 
     # Create output folder if it doesn't exist
@@ -106,7 +112,18 @@ if __name__ == '__main__':
             raise
     
     # Copy config file inside output-folder so we know what parameters it was run with.
-    shutil.copyfile(config.filename, os.path.join(config.output_folder, "_parameters.ini"))
+    if len(config.filenames) == 0:
+        print("Error: No config files loaded.")
+        sys.exit(1)
+
+    base_conf = config.filenames[0]
+    shutil.copyfile(base_conf, os.path.join(config.output_folder, "_default_parameters.ini"))
+
+    if len(config.filenames) >= 2:
+        extra_conf = config.filenames[1]
+        shutil.copyfile(extra_conf, os.path.join(config.output_folder, "_specific_parameters.ini"))
+
+
 
 
     # Start threads
