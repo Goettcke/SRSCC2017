@@ -6,4 +6,6 @@ rm -f *.pyc
 rm -rf *.zip
 rm -f slurm-dump/*
 rm -rf output*sample
-rm -rf output*
+mkdir -p stash
+mv output* stash
+rm -rf stash/output*
