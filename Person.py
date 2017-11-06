@@ -307,13 +307,9 @@ def personstring (person, indent = "", part_of_house = False) :
         longest_attr = max(longest_attr, len(attr))
         attributes.append((attr, str(s)))
 
-    l("navn", personstring_short(person))
-    l("id", person.id)
-    l("koen", person.koen)
-    l("civilstand", person.civilstand)
+    l("navn", personstring_short(person, False))
     l("foedested", person.foedested)
     l("foedeaar", person.foedeaar)
-    l("er overhoved", is_overhoved(person))
     l("erhverv", person.erhverv)
     l()
     l("sogn", person.sogn)
@@ -321,9 +317,14 @@ def personstring (person, indent = "", part_of_house = False) :
     l("amt", person.amt)
     l("husstandsfamilienr", person.husstands_familienr)
     l()
+    l("koen", person.koen)
+    l("civilstand", person.civilstand)
+    l("er overhoved", is_overhoved(person))
+    l()
     l("kipnr", person.kipnr)
     l("loebenr", person.lbnr)
     l()
+    l("id", person.id)
     l("meta_fornavn", person.meta_fornavn)
     l("meta_mlnavn", person.meta_mlnavn)
     l("meta_efternavn", person.meta_efternavn)
@@ -354,8 +355,11 @@ def personstring (person, indent = "", part_of_house = False) :
 
 
 
-def personstring_short (person) :
-    return str(person.fornavn) + " " + str(person.mlnavn) + " " + str(person.efternavn) + " (" + str(person.id) + ")"
+def personstring_short (person, with_id = True) :
+    res = str(person.fornavn) + " " + str(person.mlnavn) + " " + str(person.efternavn) 
+    if with_id:
+        res += " (" + str(person.id) + ")"
+    return res
 
 
 
@@ -383,6 +387,7 @@ def person_array_writer(person, candidates, people1845, people1850, husArr1845, 
     output = ""
 
     output += "================================================\n"
+    output += "Person we're looking for:\n"
     output += personstring(person)
     if output_houses:
         output += "\n"
@@ -412,8 +417,10 @@ def person_array_writer(person, candidates, people1845, people1850, husArr1845, 
         str(person.foedeaar), str(person.husstands_familienr), str(person.id)
     ])
 
-
-    f = open(os.path.join(config.output_folder, file_base_name) + ".txt", 'w')
+    if output_houses:
+        f = open(os.path.join(config.output_folder, file_base_name) + "_house.txt", 'w')
+    else:
+        f = open(os.path.join(config.output_folder, file_base_name) + ".txt", 'w')
     f.write(output)
     f.close()
 

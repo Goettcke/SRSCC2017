@@ -58,7 +58,9 @@ def lookupperson(peoplelist) :
 
             candidates = takeWeights(candidates, config.max_candidates_to_include)
 
-            person_array_writer(person1845, candidates, people1845, people1850, husArr1845, husArr1850, config.output_houses)
+            # Output candidates without and with household.
+            person_array_writer(person1845, candidates, people1845, people1850, husArr1845, husArr1850, False)
+            person_array_writer(person1845, candidates, people1845, people1850, husArr1845, husArr1850, True)
 
         else :
            print "No good candidates found for " + personstring_short(person1845)
