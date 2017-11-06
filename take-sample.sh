@@ -56,15 +56,21 @@ echo
 for output_folder in "$@"; do
     mkdir -p "$output_folder-sample"
     echo "Sampling ${output_folder}..."
+
+    cp "$output_folder/_default_parameters.ini" "$output_folder-sample/_default_parameters.ini" |& indent2
+    cp "$output_folder/_specific_parameters.ini" "$output_folder-sample/_specific_parameters.ini" |& indent2
+
     echo "Copying person files..." | indent2
     for file in `cat $sample_file`; do
         cp "$output_folder/$file" "$output_folder-sample/$file" |& indent4
     done
     echo "Copying house files with it..." | indent2
+
     for house_file in `cat $sample_file | sed -r 's/\.txt/_house\.txt/g'`; do
         cp "$output_folder/$house_file" "$output_folder-sample/$house_file" |& indent4
     done
     echo "Copied $(ls "$output_folder-sample" | wc -l) files." | indent2
+
     echo "Zipping..." | indent2
     zip "$output_folder-sample.zip" -r "$output_folder-sample" |& indent4
 done
