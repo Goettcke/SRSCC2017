@@ -5,14 +5,11 @@ from config import config
 
 import os.path
 import shutil
-import getData
 import sys
-from multiprocessing import  Process
-from dm import damerau_levenshtein_distance
-from getData import getHustande
-from metaphone import singlemetaphone
-#from converter import danishcharacterconverter
-#from dataSplitter import *
+import itertools
+from multiprocessing import Process
+
+import getData
 from Person import *
 
 
@@ -25,8 +22,8 @@ def lookupperson(peoplelist) :
     people1845 = getData.get_people(config.f1845_filename, 1845)
     people1850 = getData.get_people(config.f1850_filename, 1850)
 
-    husArr1845 = getHustande(people1845)
-    husArr1850 = getHustande(people1850)
+    husArr1845 = getData.getHustande(people1845)
+    husArr1850 = getData.getHustande(people1850)
 
     minlimit = config.person_distance_base_score
 
@@ -36,41 +33,35 @@ def lookupperson(peoplelist) :
 
     for number in peoplelist :
         candidates = []
-        person = people1845[number]
+        person1845 = people1845[number]
         #print "Looking for"
         #person_print_information(person)
 
         if count % status_freq == 0:
-            print("Status: Currently at " + personstring_short(person))
+            print("Status: Currently at " + personstring_short(person1845))
 
-        for i in xrange (0,len(people1850)):
-            if(person.koen == people1850[i].koen) :
-                persondistance = person_distance_score(people1850[i], person)
+        for person1850 in people1850:
+            if(person1845.koen == person1850.koen) :
+                persondistance = person_distance_score(person1845, person1850)
                 if (persondistance > minlimit):
-                    p = people1850[i].copy()
+                    p = person1850.copy()
                     p.weight = persondistance
-                    """
-                    candidates = removelowmatches(minlimit, candidates)
-                    minlimit = findminlimit(candidates)# must make a minlimit finder here 
-                    p.weight = persondistance 
-                    #print "weight: " +  str(p.weight) # Should probably add probability here 
-                    """
                     candidates.append(p)
 
         if(len(candidates) > 0) :
-           # print "length of candidates" + str(len(candidates))
             for candidate in candidates:
-                if (husdistance(people1845,people1850,person,candidate,husArr1845,husArr1850) == config.husstand_match_points) :
+                if (husdistance(people1845,people1850,person1845,candidate,husArr1845,husArr1850) == config.husstand_match_points) :
                     candidate.husmatch = True
                     candidate.weight += config.husmatch_weight_boost
-                    person.housestring = housestring(people1845,people1850,person,candidate,husArr1845,husArr1850)
 
             candidates.sort(key=lambda x: x.weight, reverse=True)
-            #person_array_iterator(candidates)
+
             candidates = takeWeights(candidates, config.max_candidates_to_include)
-            person_array_writer(person, candidates)
+
+            person_array_writer(person1845, candidates, people1845, people1850, husArr1845, husArr1850, config.output_houses)
+
         else :
-           print "No good candidates found for " + personstring_short(person)
+           print "No good candidates found for " + personstring_short(person1845)
            count_no_matches += 1
 
         count += 1
@@ -90,16 +81,18 @@ def lookupperson(peoplelist) :
 
 
 def takeWeights (candidateList, max_candidates) :
-    resCandidates = []
-    weightNR = 0
-    for candidate in candidateList :
-        currentWeight = candidate.weight
-        if (currentWeight <= 0 or weightNR > max_candidates) :
-            return resCandidates
-        else :
-            resCandidates.append(candidate)
-        weightNR += 1
-    return resCandidates
+    new_cand_list = []
+
+    for cand in candidateList:
+        if len(new_cand_list) >= max_candidates:
+            break
+        if cand.weight < 0:
+            break
+
+        new_cand_list.append(cand)
+
+    return new_cand_list
+
 
 if __name__ == '__main__':
     if len(sys.argv) < 4:

@@ -44,12 +44,10 @@ class Person:
         self.erhverv = str()
         self.id = -1
         self.group = -1
-        self.test = str()
         self.position = str()
         self.weight = int() # The weight, that the person was found using.
         self.navnsplit = []
         self.husmatch = bool()
-        self.housestring = str()
 
     def copy(self):
         return copy.deepcopy(self)
@@ -99,28 +97,15 @@ def name_comparison(p1, p2) :
 
     return 2 # 100% mismatch
 
-#Legacy code, just if binarysearch is needed in some future development
-def getPerson(peoplearr , pid) :
-    left = 0
-    right = len(peoplearr)
-    while left < right:
-        mid = (left + right) // 2
-        if pid > peoplearr[mid].id:
-            left = mid + 1
-        else:
-            right = mid
-    if left != len(peoplearr) and peoplearr[left].id == pid:
-        return peoplearr[left]
-    else:
-        raise ValueError("{!r} is not in sequence".format(pid))
 
-
-def alternategetPerson(peoplearr, pid) :
-    print str(peoplearr[pid].id) + " " + str(pid)
 
 def husdistance(peoplearr1,peoplearr2,p1,p2,husarr1,husarr2) :
-    hus1size = len(husarr1[p1.hustandsindex])
-    hus2size = len(husarr2[p2.hustandsindex])
+    hus1 = husarr1[p1.husstands_familienr]
+    hus2 = husarr2[p2.husstands_familienr]
+
+    hus1size = len(hus1)
+    hus2size = len(hus2)
+
     #print "hussizes " + str(hus1size) + " _ " +  str(hus2size)
     totalhusdistance = 0
     peopleinhouse1 = []
@@ -132,15 +117,17 @@ def husdistance(peoplearr1,peoplearr2,p1,p2,husarr1,husarr2) :
         housedivisor = min(hus1size,hus2size)
 
     for i in xrange(hus1size) :
-        peopleinhouse1.append(peoplearr1[husarr1[p1.hustandsindex][i]])
+        peopleinhouse1.append(peoplearr1[hus1[i]])
+
     for i in xrange(hus2size) :
-        peopleinhouse2.append(peoplearr2[husarr2[p2.hustandsindex][i]])
+        peopleinhouse2.append(peoplearr2[hus2[i]])
 
     for person in peopleinhouse1 :
         # print "Muuh "   + person.fornavn # check it makes the correct comparisons
         for person2 in peopleinhouse2 :
          #   print "Maaaeeh " + person2.fornavn # Just to check that It actually enters the loop
             totalhusdistance += person_distance_score(person,person2)
+
     if(hus1size != 0) :
         if((totalhusdistance / housedivisor) > config.husstand_min_weight) :
             return config.husstand_match_points
@@ -149,16 +136,21 @@ def husdistance(peoplearr1,peoplearr2,p1,p2,husarr1,husarr2) :
 
 def housestring(peoplearr1,peoplearr2,p1,p2,husarr1,husarr2) :
     output = "   Start of New HOUSE  \n  "
-    hus1size = len(husarr1[p1.hustandsindex])
-    hus2size = len(husarr2[p2.hustandsindex])
+
+    hus1 = husarr1[p1.husstands_familienr]
+    hus2 = husarr2[p2.husstands_familienr]
+
+    hus1size = len(hus1)
+    hus2size = len(hus2)
+
     peopleinhouse1 = []
     peopleinhouse2 = []
 
     for i in xrange(hus1size) :
-        peopleinhouse1.append(peoplearr1[husarr1[p1.hustandsindex][i]])
+        peopleinhouse1.append(peoplearr1[hus1[i]])
 
     for i in xrange(hus2size) :
-        peopleinhouse2.append(peoplearr2[husarr2[p2.hustandsindex][i]])
+        peopleinhouse2.append(peoplearr2[hus2[i]])
 
     output += " ------- Start house1 --------- \n"
     for person in peopleinhouse1 :
@@ -332,71 +324,108 @@ def interpolate(value, leftMin, leftMax, rightMin, rightMax):
     # Convert the 0-1 range into a value in the right range.
     return rightMin + (valueScaled * rightSpan)
 
-def person_print_information(p1):
-    assert isinstance(p1, Person)
 
-    print "navn: " + str(p1.fornavn) + " " + str(p1.mlnavn) + " " + str(p1.efternavn)
+longest_attr = 0
 
-    print "foedested: " + str(p1.foedested)
+def personstring (person, indent = "", part_of_house = False) :
+    attributes = []
+    pad = 3
 
-    print "foedeaar: " + str(p1.foedeaar)
+    def l(attr = "", s = ""):
+        global longest_attr
+        longest_attr = max(longest_attr, len(attr))
+        attributes.append((attr, str(s)))
 
-    print "is overhoved: " + str(is_overhoved(p1))
+    l("navn", personstring_short(person))
+    l("id", person.id)
+    l("koen", person.koen)
+    l("civilstand", person.civilstand)
+    l("foedested", person.foedested)
+    l("foedeaar", person.foedeaar)
+    l("er overhoved", is_overhoved(person))
+    l("erhverv", person.erhverv)
+    l()
+    l("sogn", person.sogn)
+    l("herred", person.herred)
+    l("amt", person.amt)
+    l("husstandsfamilienr", person.husstands_familienr)
+    l()
+    l("kipnr", person.kipnr)
+    l("loebenr", person.lbnr)
+    l()
+    l("meta_fornavn", person.meta_fornavn)
+    l("meta_mlnavn", person.meta_mlnavn)
+    l("meta_efternavn", person.meta_efternavn)
+    l("meta_foedested", person.meta_foedested)
+    l("navnsplit", person.navnsplit)
+    l("fornavne", person.fornavne_list)
 
-    print "erhverv: " + str(p1.erhverv)
 
-    print "weight: " + str(p1.weight)
+    if person.year != 1845:
+        try:
+            l("name_comparison_diff",  person.name_comparison_diff)
+        except AttributeError:
+            pass
 
-    print "sogn: " + str(p1.sogn)
-    print "amt: " + str(p1.amt)
-    print "husstandsfamilienr: " + str(p1.husstands_familienr)
-    print "meta_fornavn: " + str(p1.meta_fornavn)
-    print "meta_efternavn: " + "'" + str(p1.meta_efternavn)+ "'"
-    print "civilstand: " + str(p1.civilstand)
-    print "navnsplit: " + str(p1.navnsplit)
-    print "\n"
+    if person.year != 1845 and not part_of_house:
+        l("weight", person.weight)
 
-def person_array_iterator(listi) :
-    for p in listi :
-        person_print_information(p) # p is a person
+    output = ""
+    for attr, s in attributes:
+        output += indent + attr.ljust(longest_attr+pad, " ") + s + "\n"
 
-
-def personstring (person) :
-    output = "navn: " + str(person.fornavn) + " " + str(person.mlnavn) + " " + str(person.efternavn) + "\n"
-    output += "id: " + str(person.id) + "\n"
-    output += "foedested: " + str(person.foedested) + "\n"
-    output += "foedeaar: " + str(person.foedeaar) + "\n"
-    output += "is overhoved: " + str(is_overhoved(person)) + "\n"
-    output += "erhverv: " + str(person.erhverv) + "\n"
-    output += "sogn: " + str(person.sogn) + "\n"
-    output += "amt: " + str(person.amt) + "\n"
-    output += "husstandsfamilienr: " + str(person.husstands_familienr) + "\n"
-    output += "meta_fornavn: " + "'" + str(person.meta_fornavn) +"'" + "\n"
-    output += "meta_mlnavn: " + "'" + str(person.meta_mlnavn) +"'" + "\n"
-    output += "meta_efternavn: " + "'" + str(person.meta_efternavn) + "'"  + "\n"
-    output += "koen: " + str(person.koen) + "\n"
-    output += "civilstand: " + str(person.civilstand) + "\n"
-    output += "navnsplit: " + str(person.navnsplit) + "\n"
-    output += "fornavne_list: " + str(person.fornavne_list) + "\n"
-    output += "meta_foedested: " + "'" + str(person.meta_foedested) +"'" + "\n"
-    try:
-        output += "name_comparison_diff: " + str(person.name_comparison_diff) + "\n"
-    except AttributeError:
-        pass
-    output += "weight: " + str(person.weight) + "\n\n"
     return output
+
+
 
 def personstring_short (person) :
     return str(person.fornavn) + " " + str(person.mlnavn) + " " + str(person.efternavn) + " (" + str(person.id) + ")"
 
 
-def person_array_writer(person, listi) : # person is the person we're looking for
-    output = "Person we're looking for: \n --------------------\n"
-    output += personstring(person)
-    output += "--------------------\n \n---- Matches ----" + "\n"
 
-    for p in listi :
+def housestring(person, people_arr, hus_arr):
+    hus = hus_arr[person.husstands_familienr]
+
+    hus_size = len(hus)
+
+    people_in_house = []
+
+    for i in xrange(hus_size) :
+        people_in_house.append(people_arr[hus[i]])
+
+    output = "HOUSE:\n"
+    for person in people_in_house:
+        output += "    ---------------------------------------------\n"
+        output += personstring(person, "    ", True)
+        output += "    ---------------------------------------------\n\n"
+
+    return output
+
+
+
+def person_array_writer(person, candidates, people1845, people1850, husArr1845, husArr1850, output_houses = True) : # person is the person we're looking for
+    output = ""
+
+    output += "================================================\n"
+    output += personstring(person)
+    if output_houses:
+        output += "\n"
+        output += housestring(person, people1845, husArr1845)
+    output += "================================================\n"
+    output += "\n"
+
+
+    for i, p in enumerate(candidates):
+        output += "--------------- Match %d start -------------------------\n" % (i+1)
         output += personstring(p) # p is a person
+        if output_houses:
+            output += "\n"
+            output += housestring(p, people1850, husArr1850)
+        output += "--------------- Match %d end   -------------------------\n" % (i+1)
+        output += "\n"
+
+
+
 
     mlnavn_list = person.mlnavn.split(" ")
     if len(mlnavn_list) == 1 and mlnavn_list[0] == "":
@@ -407,27 +436,10 @@ def person_array_writer(person, listi) : # person is the person we're looking fo
         str(person.foedeaar), str(person.husstands_familienr), str(person.id)
     ])
 
-    file_house_name = file_base_name + "_house"
-
 
     f = open(os.path.join(config.output_folder, file_base_name) + ".txt", 'w')
     f.write(output)
     f.close()
-
-    if(person.housestring != None) :
-        f = open(os.path.join(config.output_folder, file_house_name) + ".txt", 'w')
-        f.write(person.housestring)
-
-
-
-
-
-
-
-
-
-
-
 
 
 

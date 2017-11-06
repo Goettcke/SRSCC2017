@@ -2,6 +2,7 @@
 from config import config
 
 import re
+import itertools
 
 from bisect import bisect_left
 
@@ -110,30 +111,24 @@ def get_people(filename, year):
 
             p.koen = lineSplit[4]
 
-            """ 
-            matchObj = re.match(r'(.*)sogn(.*)', lineSplit[5])
-
-            if (matchObj != None):
-                p.foedested = p.sogn
-            else:
-                p.foedested = lineSplit[5]
-            """
             p.foedested = lineSplit[5]
             p.meta_foedested = metaphone(p.foedested)
 
-
-            if(is_number(lineSplit[6])) :
-                p.foedeaar = int(lineSplit[6])
-            else :
-                p.foedeaar = 0
-
+            p.foedeaar = get_if_number(lineSplit[6])
 
             p.civilstand = lineSplit[7]
             p.position = lineSplit[8]
             p.erhverv = lineSplit[9]
-            p.husstands_familienr = lineSplit[10]
+
+            p.husstands_familienr = get_if_number(lineSplit[10])
+
             p.kipnr = lineSplit[11]
-            p.lbnr = lineSplit[12]
+
+            m = re.search("\D", lineSplit[12])
+            if m:
+                p.lbnr = get_if_number(lineSplit[12][:m.start()])
+            else:
+                p.lbnr = get_if_number(lineSplit[12])
 
             if config.name_use_metaphone:
                 p.meta_fornavn   = metaphone(p.fornavn)
@@ -152,39 +147,30 @@ def get_people(filename, year):
             p.housestring = None
         counter += 1
 
-    print "Got : " + str(len(people)) + " people from dataset"
+    print "Loaded: " + str(len(people)) + " people from dataset " + str(year)
     return people
 
 def getHustande(peopleArr) :
-    currentHouse = peopleArr[0].husstands_familienr
-    husArr = []
-    currentIndex = 0
-    people = []
-    for i in xrange (len(peopleArr)) :
-        if (peopleArr[i].husstands_familienr != currentHouse) :
-            husArr.append(people)
-            currentHouse = peopleArr[i].husstands_familienr
-            people = []
-            currentIndex += 1
-        else :
-            people.append(peopleArr[i].id)
+    hus_dict = {}
 
-        peopleArr[i].hustandsindex = currentIndex
+    for person in peopleArr:
+        fam_nr = person.husstands_familienr
+        if not fam_nr in hus_dict:
+            hus_dict[fam_nr] = []
+        hus_dict[fam_nr].append(person.id)
 
-    # print str(husArr[0]) + "getting person"
-    #p = getPerson(peopleArr, husArr[1337][0])
-    #p2 = peopleArr[1337]
-    #print len(peopleArr)
-    #print p.fornavn +" " +  p.mlnavn  + " " + p.efternavn
-    #print p2.fornavn +" " +  p2.mlnavn  + " " + p2.efternavn
-    #print " got person"
-    #print alternategetPerson(peopleArr,p.id)
-    return husArr
+    return hus_dict
 
 
-def is_number(foedeaar):
+def is_number(n):
     try:
-        int(foedeaar)
+        int(n)
         return True
     except:
         return False
+
+def get_if_number(n, default_value = -1):
+    try:
+        return int(n)
+    except:
+        return default_value
