@@ -60,18 +60,20 @@ Erhverv comparison : +5 if equal else -1
 
 def get_people(filename, year):
     fo = open(filename)
+
+    for line in fo:
+        # Get rid of the header line
+        break
+
+    regex_pattern = re.compile("\D")
+
     counter = 1
     people = []
     pid = 0
+
     for line in fo:
-
-        if line.startswith("amt|herred"):
-            # Ignore the header
-            continue
-
         lineSplit = line.split("|")
-        #print line
-        #print len(lineSplit)
+
         if (len(lineSplit)  == 13) :
             p = Person(year)
 
@@ -124,7 +126,7 @@ def get_people(filename, year):
 
             p.kipnr = lineSplit[11]
 
-            m = re.search("\D", lineSplit[12])
+            m = regex_pattern.search(lineSplit[12])
             if m:
                 p.lbnr = get_if_number(lineSplit[12][:m.start()])
             else:
@@ -144,7 +146,7 @@ def get_people(filename, year):
             p.id = pid # So all people have a unique ID
             pid += 1
             people.append(p)
-            p.housestring = None
+
         counter += 1
 
     print "Loaded: " + str(len(people)) + " people from dataset " + str(year)

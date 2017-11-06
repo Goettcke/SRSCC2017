@@ -151,7 +151,7 @@ if __name__ == '__main__':
 
     intervals = []
     counter = lowbound
-    limit = 20
+
     for i in xrange(threads) :
         personnumbers = []
         if(i != threads - 1) :
@@ -165,10 +165,18 @@ if __name__ == '__main__':
                 counter = counter + 1
             intervals.append(personnumbers)
 
-    print intervals
+    print("Process %d-%d with %d thread(s)." % (lowbound, highbound-1, threads))
+
     procs = []
     for i in xrange(threads):
-        proc = Process(target=lookupperson, args=(intervals[i],))
+        interval = intervals[i]
+
+        if len(interval) == 0:
+            continue
+
+        print("Starting thread %d-%d." % (interval[0], interval[-1])) 
+
+        proc = Process(target=lookupperson, args=(interval,))
         procs.append(proc)
         proc.start()
 

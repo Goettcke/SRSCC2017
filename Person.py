@@ -137,38 +137,6 @@ def husdistance(peoplearr1,peoplearr2,p1,p2,husarr1,husarr2) :
         else :
             return config.husstand_mismatch_points
 
-def housestring(peoplearr1,peoplearr2,p1,p2,husarr1,husarr2) :
-    output = "   Start of New HOUSE  \n  "
-
-    hus1 = husarr1[p1.husstands_familienr]
-    hus2 = husarr2[p2.husstands_familienr]
-
-    hus1size = len(hus1)
-    hus2size = len(hus2)
-
-    peopleinhouse1 = []
-    peopleinhouse2 = []
-
-    for i in xrange(hus1size) :
-        peopleinhouse1.append(peoplearr1[hus1[i]])
-
-    for i in xrange(hus2size) :
-        peopleinhouse2.append(peoplearr2[hus2[i]])
-
-    output += " ------- Start house1 --------- \n"
-    for person in peopleinhouse1 :
-        output += personstring(person)
-
-    output += " ------- End of house1 --------- \n"
-
-
-    output += " ------- Start house2 --------- \n"
-
-    for person2 in peopleinhouse2 :
-        output += personstring(person2)
-    output += " ------- End of house2 --------- \n"
-    output += "   End of New HOUSE  \n  "
-    return output
 
 
 
@@ -367,6 +335,7 @@ def personstring (person, indent = "", part_of_house = False) :
     if person.year != 1845:
         try:
             l("name_comparison_diff",  person.name_comparison_diff)
+            l("husmatch",  person.husmatch)
         except AttributeError:
             pass
 
