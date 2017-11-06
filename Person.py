@@ -3,6 +3,7 @@ from config import config
 
 from dm import *
 import re
+import sys
 import os, errno
 import os.path
 import copy
@@ -57,7 +58,7 @@ def name_comparison(p1, p2) :
     assert isinstance(p1, Person)
     assert isinstance(p2, Person)
 
-    if config.name_comparison_method == "old":
+    if config.name_comp_method == config._old:
         if(len(p1.meta_efternavn) > 0 and len(p2.meta_efternavn) > 0 and \
            len(p1.meta_fornavn) > 0 and len(p2.meta_fornavn) > 0 ):
 
@@ -79,7 +80,9 @@ def name_comparison(p1, p2) :
                 result = fn_percentdifference + ml_percentdifference + en_percentdifference
 
                 return result / 3
-    elif config.name_comparison_method == "sort-fornavne":
+        return 2 # 100% mismatch
+
+    elif config.name_comp_method == config._sort_fornavne:
         count = 0
         percent_diff = 0
         
@@ -94,8 +97,8 @@ def name_comparison(p1, p2) :
 
         return percent_diff / count
 
-
-    return 2 # 100% mismatch
+    print("Unknown name_comparison_method '%s'" % config.name_comparison_method)
+    sys.exit(1)
 
 
 
