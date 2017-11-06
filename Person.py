@@ -335,6 +335,10 @@ def personstring (person, indent = "", part_of_house = False) :
     if person.year != 1845:
         try:
             l("name_comparison_diff",  person.name_comparison_diff)
+        except AttributeError:
+            pass
+
+        try:
             l("husmatch",  person.husmatch)
         except AttributeError:
             pass
