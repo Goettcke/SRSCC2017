@@ -120,10 +120,6 @@ if __name__ == '__main__':
         config.init(c(default_config_filename))
 
     
-    # Make it faster to determine name_comparison_method
-    config.name_comp_method = hash(config.name_comparison_method)
-    config._old = hash("old")
-    config._sort_fornavne = hash("sort-fornavne")
 
     # Create output folder if it doesn't exist
     # https://stackoverflow.com/a/273227

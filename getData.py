@@ -107,8 +107,7 @@ def get_people(filename, year):
             p.fornavne_list = navn_split[:-1]
             if config.sort_fornavne:
                 p.fornavne_list.sort()
-            if config.name_use_metaphone:
-                p.fornavne_list = map(metaphone, p.fornavne_list)
+            p.meta_fornavne_list = map(metaphone, p.fornavne_list)
 
 
             p.koen = lineSplit[4]
@@ -132,7 +131,7 @@ def get_people(filename, year):
             else:
                 p.lbnr = get_if_number(lineSplit[12])
 
-            if config.name_use_metaphone:
+            if not config.use_legacy_name_comparison or config.legacy_name_use_metaphone:
                 p.meta_fornavn   = metaphone(p.fornavn)
                 p.meta_mlnavn    = metaphone(p.mlnavn)
                 p.meta_efternavn = metaphone(p.efternavn)

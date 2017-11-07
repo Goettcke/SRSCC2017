@@ -600,8 +600,8 @@ class DoubleMetaphone(object):
                 if self.next[1]:
                     self.secondary_phone += self.next[1]
                 self.position += self.next[2]
-        if self.primary_phone == self.secondary_phone:
-            self.secondary_phone = ""
+        #if self.primary_phone == self.secondary_phone:
+        #    self.secondary_phone = ""
         return (self.primary_phone, self.secondary_phone)
 
 

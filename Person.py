@@ -2,6 +2,7 @@
 from config import config
 
 from dm import *
+from metaphone import *
 import re
 import sys
 import os, errno
@@ -50,6 +51,7 @@ class Person:
         self.navnsplit = []
         self.husmatch = bool()
         self.name_comparison_diff = float("inf")
+        self.name_comparison_diff_leven = float("inf")
 
     def copy(self):
         return copy.deepcopy(self)
@@ -59,7 +61,27 @@ def name_comparison(p1, p2) :
     assert isinstance(p1, Person)
     assert isinstance(p2, Person)
 
-    if config.name_comp_method == config._old:
+    if not config.use_legacy_name_comparison:
+        count = 0
+        score = 0
+
+        fornavne_score = config.name_comparison_fornavne_score
+        efternavn_score = config.name_comparison_efternavn_score
+
+        for (fornavn1, fornavn2) in itertools.izip_longest(p1.meta_fornavne_list, p2.meta_fornavne_list, fillvalue=""):
+            if compare_metaphone(fornavn1, fornavn2):
+                score += fornavne_score
+            count += fornavne_score
+
+        if compare_metaphone(p1.meta_efternavn, p2.meta_efternavn):
+            score += efternavn_score
+        count += efternavn_score
+
+        return 1.0 - score / float(count)
+
+
+
+    else:
         if(len(p1.meta_efternavn) > 0 and len(p2.meta_efternavn) > 0 and \
            len(p1.meta_fornavn) > 0 and len(p2.meta_fornavn) > 0 ):
 
@@ -69,7 +91,7 @@ def name_comparison(p1, p2) :
                 fn_percentdifference = percent_levenshtein_helper(p1.meta_fornavn, p2.meta_fornavn)
 
                 # Higher weight on fornavn
-                if fn_percentdifference >= config.fornavn_max_percent_difference:
+                if fn_percentdifference >= config.legacy_fornavn_max_percent_difference:
                     return 2
 
                 # Mellemnavn
@@ -82,24 +104,6 @@ def name_comparison(p1, p2) :
 
                 return result / 3
         return 2 # 100% mismatch
-
-    elif config.name_comp_method == config._sort_fornavne:
-        count = 0
-        percent_diff = 0
-        
-        for (fornavn1, fornavn2) in itertools.izip_longest(p1.fornavne_list, p2.fornavne_list, fillvalue=""):
-            percent_diff += percent_levenshtein_helper(fornavn1, fornavn2)
-            if fornavn1 != "" and fornavn2 != "":
-                # Only count this fornavn comparison if one of the names actually exists
-                count += 1
-
-        percent_diff += percent_levenshtein_helper(p1.meta_efternavn, p2.meta_efternavn)
-        count += 1
-
-        return percent_diff / count
-
-    print("Unknown name_comparison_method '%s'" % config.name_comparison_method)
-    sys.exit(1)
 
 
 
@@ -171,7 +175,6 @@ her_i_sognet_regex = re.compile(r'(.*)sognet(.*)')
 def foedested_comparison(person1, person2) : 
     assert isinstance(person1, Person)
     assert isinstance(person2, Person)
-    #print "Foedested_comparison"
 
     matchObj1 = re.match(her_i_sognet_regex, person1.foedested)
     matchObj2 = re.match(her_i_sognet_regex, person2.foedested)
@@ -202,7 +205,7 @@ def foedested_comparison(person1, person2) :
                 return config.foedested_sogn_match_points
     else :
         if config.foedested_use_metaphone:
-            if person1.meta_foedested == person2.meta_foedested:
+            if compare_metaphone(person1.meta_foedested, person2.meta_foedested):
                 return config.foedested_exact_match_points
         else:
             if(person1.foedested == person2.foedested) :
@@ -261,7 +264,32 @@ def person_distance_score(p1, p2):
             # If the diff is very big, e.g. close to 1, we should give no points.
             # So we take 1 - diff to get this effect.
             # Finally we scale with a factor so it can be between 0 to 100 or 0 to 10 if we want.
-            result += int((1 - interpolated_diff)*config.name_comparison_boost_scale)
+            result += int((1 - interpolated_diff)*config.name_comparison_boost_points)
+
+        if config.use_name_comparison_leven_boost:
+            percent_diff = 0.0
+            count = 0
+
+            for (fornavn1, fornavn2) in itertools.izip_longest(p1.fornavne_list, p2.fornavne_list, fillvalue=""):
+                percent_diff += percent_levenshtein(fornavn1, fornavn2)
+                count += 1
+
+            percent_diff += percent_levenshtein(p1.efternavn, p2.efternavn)
+            count += 1
+
+            avg_percent_diff = percent_diff / count
+
+            p2.name_comparison_diff_leven = avg_percent_diff
+
+            # If the average percentage difference is high (towards 1), we give a penalty.
+            # If the average percentage difference is low (towards 0), we give a bouns.
+            interpolated_score = interpolate(
+                avg_percent_diff, 
+                0.0, 1.0,
+                config.name_comparison_leven_boost_points/2, -config.name_comparison_leven_boost_points/2
+            )
+
+            result += int(round(interpolated_score))
 
     return result # Which in this case is equal to 0
 
@@ -315,6 +343,7 @@ def personstring (person, indent = "", part_of_house = False) :
     l("meta_foedested", person.meta_foedested)
     l("navnsplit", person.navnsplit)
     l("fornavne", person.fornavne_list)
+    l("meta_fornavne", person.meta_fornavne_list)
 
 
     if person.year != 1845:
@@ -417,18 +446,24 @@ def person_array_writer_csv(person, candidates, delimiter = "|"):
     atttributes = [
         "match_nr", "vaegt", "navn", "foedested", "foedeaar", 
         "erhverv", "sogn", "herred", "amt", "husstands_familienr", "husmatch",
-        "koen", "civilstand", "overhoved", "navn_afstand",
+        "koen", "civilstand", "overhoved", 
         "kipnr", "loebenr", "id",
+        "navn_afstand_meta", "navne_afstand_leven",
+        "meta_fornave", "meta_efternavn", "meta_foedested",
     ]
 
     def line(p, match_nr):
         w = p.weight if p.weight > 0 else ""
         name_diff = "%.1f %%" % (p.name_comparison_diff * 100)
+        name_diff_leven = "%.1f %%" % (p.name_comparison_diff_leven * 100)
+        fornavne = " ".join(str(x) for x in p.meta_fornavne_list)
         return [
             match_nr, w, personstring_short(p, False), p.foedested, p.foedeaar,
             p.erhverv, p.sogn, p.herred, p.amt, p.husstands_familienr, p.husmatch,
-            p.koen, p.civilstand, is_overhoved(p, "1", "0"), name_diff,
+            p.koen, p.civilstand, is_overhoved(p),
             p.kipnr, p.lbnr, p.id,
+            name_diff, name_diff_leven,
+            fornavne, p.meta_efternavn, p.meta_foedested,
         ]
 
     path = get_person_filepath(person)
