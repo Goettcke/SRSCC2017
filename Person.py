@@ -470,7 +470,7 @@ def person_array_writer_csv(person, candidates, delimiter = "|"):
 
     path = get_person_filepath(person)
 
-    f = open(path + "_simple.csv", 'w')
+    f = open(path + ".csv", 'w')
 
     f.write("sep=" + delimiter + "\n")
 
