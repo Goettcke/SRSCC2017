@@ -115,9 +115,11 @@ def husdistance(peoplearr1,peoplearr2,p1,p2,husarr1,husarr2) :
     peopleinhouse1 = []
     peopleinhouse2 = []
 
-    if(hus1size == 0 or hus2size == 0) :
-        housedivisor = max(hus1size, hus2size) ## Could potentially give division by 0 if both zero but not in 1845 1850.
-    else :
+    if hus1size == 0 and hus2size == 0:
+        housedivisor = 1
+    elif hus1size == 0 or hus2size == 0:
+        housedivisor = max(hus1size, hus2size)
+    else:
         housedivisor = min(hus1size,hus2size)
 
     for i in xrange(hus1size) :
@@ -164,31 +166,35 @@ def foedeaar_comparison(person1,person2) : # Enten 10 eller 0 Grov sortering
         return config.foedeaar_mismatch_points
 
 
+her_i_sognet_regex = re.compile(r'(.*)sognet(.*)')
+
 def foedested_comparison(person1, person2) : 
     assert isinstance(person1, Person)
     assert isinstance(person2, Person)
     #print "Foedested_comparison"
-    pattern = r"sognet"
-    matchObj = re.match(r'(.*)' + pattern + r'(.*)',person1.foedested)
-    matchObj2 = re.match(r'(.*)' + pattern + r'(.*)',person2.foedested)
 
-    if (matchObj != None and matchObj2 != None): # Case both is some version of "heri sognet"
+    matchObj1 = re.match(her_i_sognet_regex, person1.foedested)
+    matchObj2 = re.match(her_i_sognet_regex, person2.foedested)
+
+    p1_wrote_her_i_sognet = matchObj1 != None
+    p2_wrote_her_i_sognet = matchObj2 != None
+
+    if (p1_wrote_her_i_sognet and p2_wrote_her_i_sognet): # Case both is some version of "heri sognet"
         if(person1.sogn == person2.sogn) :
-            # Both is something herisognet, so comparing sogn
             return config.foedested_sogn_match_points
         elif(person1.herred == person2.herred) :
             return config.foedested_herred_match_points
         elif(person1.amt == person2.amt) :
             return config.foedested_amt_match_points
 
-    elif(matchObj != None and matchObj2 == None) :
+    elif(p1_wrote_her_i_sognet and not p2_wrote_her_i_sognet) :
         person1places = [person1.amt, person1.herred, person1.sogn]
 
         for p1place in person1places :
             if (p1place == person2.sogn):
                 return config.foedested_sogn_match_points
 
-    elif (matchObj == None and matchObj2 != None):
+    elif (not p1_wrote_her_i_sognet and p2_wrote_her_i_sognet):
         person2places = [person2.amt, person2.herred, person2.sogn]
 
         for p2place in person2places:
@@ -201,7 +207,6 @@ def foedested_comparison(person1, person2) :
         else:
             if(person1.foedested == person2.foedested) :
                 return config.foedested_exact_match_points
-   # print "none of the foedesteder contained sogn and didn't match so returning 0"
 
     return config.foedested_mismatch_points
 
@@ -261,29 +266,6 @@ def person_distance_score(p1, p2):
     return result # Which in this case is equal to 0
 
 
-def is_match(p1,p2,limit):
-    assert isinstance(p1, Person)
-    assert isinstance(p2, Person)
-    if(person_distance_score(p1, p2) > limit) : # So just use the distance directlyt
-        return True
-    else :
-        return False
-
-# removes matches in the list that are lower than a certain limit. 
-def removelowmatches(limit,inputlist) : 
-    output = [] 
-    for person in inputlist : 
-        if person.weight > limit : 
-            output.append(person)
-    print "removed: " + str(len(inputlist)-len(output)) + " candidates" 
-    return output
-
-def findminlimit(inputlist) : 
-    limit = 30 #This should be a universal max weights
-    for person in inputlist : 
-        if(person.weight < limit) : 
-            limit = person.weight
-    return limit
 
 def interpolate(value, leftMin, leftMax, rightMin, rightMax):
     # Figure out how 'wide' each range is
@@ -295,6 +277,7 @@ def interpolate(value, leftMin, leftMax, rightMin, rightMax):
 
     # Convert the 0-1 range into a value in the right range.
     return rightMin + (valueScaled * rightSpan)
+
 
 
 longest_attr = 0
@@ -444,7 +427,7 @@ def person_array_writer_csv(person, candidates, delimiter = "|"):
         return [
             match_nr, w, personstring_short(p, False), p.foedested, p.foedeaar,
             p.erhverv, p.sogn, p.herred, p.amt, p.husstands_familienr, p.husmatch,
-            p.koen, p.civilstand, is_overhoved(p, "1", "0"), name_diff
+            p.koen, p.civilstand, is_overhoved(p, "1", "0"), name_diff,
             p.kipnr, p.lbnr, p.id,
         ]
 
