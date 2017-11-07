@@ -59,9 +59,11 @@ def lookupperson(peoplelist) :
             candidates = takeWeights(candidates, config.max_candidates_to_include)
 
             # Output candidates without and with household.
-            person_array_writer(person1845, candidates, people1845, people1850, husArr1845, husArr1850, False)
-            person_array_writer(person1845, candidates, people1845, people1850, husArr1845, husArr1850, True)
-            person_array_writer_csv(person1845, candidates)
+            if config.csv_output:
+                person_array_writer_csv(person1845, candidates)
+            else:
+                person_array_writer(person1845, candidates, people1845, people1850, husArr1845, husArr1850, False)
+                person_array_writer(person1845, candidates, people1845, people1850, husArr1845, husArr1850, True)
 
         else :
            print "No good candidates found for " + personstring_short(person1845)
@@ -97,6 +99,32 @@ def takeWeights (candidateList, max_candidates) :
     return new_cand_list
 
 
+
+def lookup_houses():
+    print("Computing households.")
+
+    def lookup_houses_of_year(year):
+        print("Households of %d." % year)
+        filename = config.f1845_filename if year == 1845 else config.f1850_filename
+        people = getData.get_people(filename, year)
+        hus_arr = getData.getHustande(people)
+
+        count = 0
+        for house_num, people_id_in_house in hus_arr.items():
+            people_in_house = sorted((people[i] for i in people_id_in_house), key=lambda x: x.navnsplit)
+            house_array_writer_csv(house_num, people_in_house, year)
+            count += 1
+
+        print("Finished writing %d households to file." % count)
+
+    lookup_houses_of_year(1845)
+    lookup_houses_of_year(1850)
+
+
+
+
+
+
 if __name__ == '__main__':
     if len(sys.argv) < 4:
         print("Usage: ./main.py lowbound highbound threads [config-file]")
@@ -128,6 +156,12 @@ if __name__ == '__main__':
     except OSError as e:
         if e.errno != errno.EEXIST:
             raise
+
+    try:
+        os.makedirs(config.output_house_folder)
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise
     
     # Copy config file inside output-folder so we know what parameters it was run with.
     if len(config.filenames) == 0:
@@ -142,6 +176,9 @@ if __name__ == '__main__':
         shutil.copyfile(extra_conf, os.path.join(config.output_folder, "_specific_parameters.ini"))
 
 
+    if config.houses_only_run:
+        lookup_houses()
+        sys.exit(0)
 
 
     # Start threads

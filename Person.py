@@ -442,29 +442,31 @@ def person_array_writer(person, candidates, people1845, people1850, husArr1845, 
     f.close()
 
 
-def person_array_writer_csv(person, candidates, delimiter = "|"):
-    atttributes = [
-        "match_nr", "vaegt", "navn", "foedested", "foedeaar", 
-        "erhverv", "sogn", "herred", "amt", "husstands_familienr", "husmatch",
-        "koen", "civilstand", "overhoved", 
-        "kipnr", "loebenr", "id",
-        "navn_afstand_meta", "navne_afstand_leven",
-        "meta_fornave", "meta_efternavn", "meta_foedested",
+csv_attributes = [
+    "match_nr", "vaegt", "navn", "foedested", "foedeaar", 
+    "erhverv", "sogn", "herred", "amt", "husstands_familienr", "husmatch",
+    "koen", "civilstand", "overhoved", 
+    "kipnr", "loebenr", "id",
+    "navn_afstand_meta", "navne_afstand_leven",
+    "meta_fornave", "meta_efternavn", "meta_foedested",
+]
+
+def csv_line(p, match_nr):
+    w = p.weight if p.weight > 0 else ""
+    name_diff = "%.1f %%" % (p.name_comparison_diff * 100)
+    name_diff_leven = "%.1f %%" % (p.name_comparison_diff_leven * 100)
+    fornavne = " ".join(str(x) for x in p.meta_fornavne_list)
+    return [
+        match_nr, w, personstring_short(p, False), p.foedested, p.foedeaar,
+        p.erhverv, p.sogn, p.herred, p.amt, p.husstands_familienr, p.husmatch,
+        p.koen, p.civilstand, is_overhoved(p),
+        p.kipnr, p.lbnr, p.id,
+        name_diff, name_diff_leven,
+        fornavne, p.meta_efternavn, p.meta_foedested,
     ]
 
-    def line(p, match_nr):
-        w = p.weight if p.weight > 0 else ""
-        name_diff = "%.1f %%" % (p.name_comparison_diff * 100)
-        name_diff_leven = "%.1f %%" % (p.name_comparison_diff_leven * 100)
-        fornavne = " ".join(str(x) for x in p.meta_fornavne_list)
-        return [
-            match_nr, w, personstring_short(p, False), p.foedested, p.foedeaar,
-            p.erhverv, p.sogn, p.herred, p.amt, p.husstands_familienr, p.husmatch,
-            p.koen, p.civilstand, is_overhoved(p),
-            p.kipnr, p.lbnr, p.id,
-            name_diff, name_diff_leven,
-            fornavne, p.meta_efternavn, p.meta_foedested,
-        ]
+def person_array_writer_csv(person, candidates, delimiter = "|"):
+
 
     path = get_person_filepath(person)
 
@@ -472,23 +474,36 @@ def person_array_writer_csv(person, candidates, delimiter = "|"):
 
     f.write("sep=" + delimiter + "\n")
 
-    f.write(delimiter.join(["emne", ""] + atttributes[2:]) + "\n")
+    f.write(delimiter.join(["emne", ""] + csv_attributes[2:]) + "\n")
 
-    atttribute_values = line(person, "")
-    f.write(delimiter.join(str(a) for a in atttribute_values) + "\n")
+    attribute_values = csv_line(person, "")
+    f.write(delimiter.join(str(a) for a in attribute_values) + "\n")
 
     f.write("\n")
 
-    f.write(delimiter.join(atttributes) + "\n")
+    f.write(delimiter.join(csv_attributes) + "\n")
 
     for i, cand in enumerate(candidates):
-        atttribute_values = line(cand, i+1)
-        f.write(delimiter.join(str(a) for a in atttribute_values) + "\n")
+        attribute_values = csv_line(cand, i+1)
+        f.write(delimiter.join(str(a) for a in attribute_values) + "\n")
 
     f.close()
 
 
+def house_array_writer_csv(house_num, people_in_house, year, delimiter = "|"):
+    path = os.path.join(config.output_house_folder, "house_%d_%d.csv" % (year, house_num))
 
+    f = open(path, 'w')
+
+    f.write("sep=" + delimiter + "\n")
+
+    f.write(delimiter.join(["", ""] + csv_attributes[2:]) + "\n")
+
+    for i, person in enumerate(people_in_house):
+        attribute_values = csv_line(person, i+1)
+        f.write(delimiter.join(str(a) for a in attribute_values) + "\n")
+
+    f.close()
 
 
 

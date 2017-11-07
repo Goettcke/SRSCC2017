@@ -2,6 +2,7 @@
 *.out
 *.zip
 output*/
+houses*/
 stash/
 
 # Byte-compiled / optimized / DLL files
