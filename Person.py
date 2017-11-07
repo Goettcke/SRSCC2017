@@ -49,6 +49,7 @@ class Person:
         self.weight = int() # The weight, that the person was found using.
         self.navnsplit = []
         self.husmatch = bool()
+        self.name_comparison_diff = float("inf")
 
     def copy(self):
         return copy.deepcopy(self)
@@ -205,12 +206,12 @@ def foedested_comparison(person1, person2) :
     return config.foedested_mismatch_points
 
 
-def is_overhoved(person) :
+def is_overhoved(person, yes_result = True, no_result = False) :
     assert isinstance(person, Person)
     if(person.position == "husstandsoverhoved") :
-        return True
+        return yes_result
     else :
-        return False
+        return no_result
 
 def overhoved_comparison(p1,p2) :
     if(is_overhoved(p1) == is_overhoved(p2)) :
@@ -234,6 +235,8 @@ def person_distance_score(p1, p2):
 
     name_comparison_diff = name_comparison(p1, p2)
 
+    p2.name_comparison_diff = name_comparison_diff
+    
     if (name_comparison_diff <= config.name_comparison_max_percent_difference) : 
         result += foedeaar_comparison(p1,p2) 
         result += foedested_comparison(p1,p2) 
@@ -254,8 +257,6 @@ def person_distance_score(p1, p2):
             # So we take 1 - diff to get this effect.
             # Finally we scale with a factor so it can be between 0 to 100 or 0 to 10 if we want.
             result += int((1 - interpolated_diff)*config.name_comparison_boost_scale)
-
-        p1.name_comparison_diff = name_comparison_diff
 
     return result # Which in this case is equal to 0
 
@@ -319,7 +320,7 @@ def personstring (person, indent = "", part_of_house = False) :
     l()
     l("koen", person.koen)
     l("civilstand", person.civilstand)
-    l("er overhoved", is_overhoved(person))
+    l("er overhoved", is_overhoved(person, "ja", "nej"))
     l()
     l("kipnr", person.kipnr)
     l("loebenr", person.lbnr)
@@ -349,14 +350,17 @@ def personstring (person, indent = "", part_of_house = False) :
 
     output = ""
     for attr, s in attributes:
-        output += indent + attr.ljust(longest_attr+pad, " ") + s + "\n"
+        if attr != "":
+            output += indent + (attr + ":").ljust(longest_attr+pad, " ") + s
+        output += "\n"
+
 
     return output
 
 
 
-def personstring_short (person, with_id = True) :
-    res = str(person.fornavn) + " " + str(person.mlnavn) + " " + str(person.efternavn) 
+def personstring_short(person, with_id = True) :
+    res = " ".join(person.navnsplit)
     if with_id:
         res += " (" + str(person.id) + ")"
     return res
@@ -382,6 +386,15 @@ def housestring(person, people_arr, hus_arr):
     return output
 
 
+def get_person_filepath(person):
+    file_base_name = "_".join(
+        person.navnsplit + 
+        [str(person.foedeaar), str(person.husstands_familienr), str(person.id)]
+    )
+
+    path = os.path.join(config.output_folder, file_base_name)
+
+    return path
 
 def person_array_writer(person, candidates, people1845, people1850, husArr1845, husArr1850, output_houses = True) : # person is the person we're looking for
     output = ""
@@ -407,24 +420,54 @@ def person_array_writer(person, candidates, people1845, people1850, husArr1845, 
 
 
 
-
-    mlnavn_list = person.mlnavn.split(" ")
-    if len(mlnavn_list) == 1 and mlnavn_list[0] == "":
-        mlnavn_list = []
-
-    file_base_name = "_".join([
-        person.fornavn] + mlnavn_list + [person.efternavn, 
-        str(person.foedeaar), str(person.husstands_familienr), str(person.id)
-    ])
+    path = get_person_filepath(person)
 
     if output_houses:
-        f = open(os.path.join(config.output_folder, file_base_name) + "_house.txt", 'w')
+        f = open(path + "_house.txt", 'w')
     else:
-        f = open(os.path.join(config.output_folder, file_base_name) + ".txt", 'w')
+        f = open(path + ".txt", 'w')
     f.write(output)
     f.close()
 
 
+def person_array_writer_csv(person, candidates, delimiter = "|"):
+    atttributes = [
+        "match_nr", "vaegt", "navn", "foedested", "foedeaar", 
+        "erhverv", "sogn", "herred", "amt", "husstands_familienr", "husmatch",
+        "koen", "civilstand", "overhoved", "navn_afstand",
+        "kipnr", "loebenr", "id",
+    ]
+
+    def line(p, match_nr):
+        w = p.weight if p.weight > 0 else ""
+        name_diff = "%.1f %%" % (p.name_comparison_diff * 100)
+        return [
+            match_nr, w, personstring_short(p, False), p.foedested, p.foedeaar,
+            p.erhverv, p.sogn, p.herred, p.amt, p.husstands_familienr, p.husmatch,
+            p.koen, p.civilstand, is_overhoved(p, "1", "0"), name_diff
+            p.kipnr, p.lbnr, p.id,
+        ]
+
+    path = get_person_filepath(person)
+
+    f = open(path + "_simple.csv", 'w')
+
+    f.write("sep=" + delimiter + "\n")
+
+    f.write(delimiter.join(["emne", ""] + atttributes[2:]) + "\n")
+
+    atttribute_values = line(person, "")
+    f.write(delimiter.join(str(a) for a in atttribute_values) + "\n")
+
+    f.write("\n")
+
+    f.write(delimiter.join(atttributes) + "\n")
+
+    for i, cand in enumerate(candidates):
+        atttribute_values = line(cand, i+1)
+        f.write(delimiter.join(str(a) for a in atttribute_values) + "\n")
+
+    f.close()
 
 
 

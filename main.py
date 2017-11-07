@@ -61,6 +61,7 @@ def lookupperson(peoplelist) :
             # Output candidates without and with household.
             person_array_writer(person1845, candidates, people1845, people1850, husArr1845, husArr1850, False)
             person_array_writer(person1845, candidates, people1845, people1850, husArr1845, husArr1850, True)
+            person_array_writer_csv(person1845, candidates)
 
         else :
            print "No good candidates found for " + personstring_short(person1845)
