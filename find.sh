@@ -38,7 +38,7 @@ for person_file_with_ext in $(find "$FOLDER" -iname "$(fuzzy_pattern "$PATTERN")
     id=$(echo $person_year_house_id | cut -d'_' -f3)
 
     echo "$name|$year|$house|$id"
-done | sort -k2 -t'|' >> $tmpfile # Sort it and store it
+done | sort -k1 -t'|' >> $tmpfile # Sort it and store it
 
 # Find number of people
 LEN=$(cat $tmpfile | wc -l)
