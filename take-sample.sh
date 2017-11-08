@@ -30,6 +30,9 @@ echo
 
 echo "Checking if all files in sample is present in all data folders..."
 for file in `cat $temp_file`; do
+    if [[ "$file" == _* ]]; then
+        continue
+    fi
     exists_everywhere=true
     for output_folder in "$@"; do
         if [ ! -f "$output_folder/$file" ]; then
@@ -55,6 +58,9 @@ echo
 
 for output_folder in "$@"; do
     mkdir -p "$output_folder-sample"
+    mkdir -p "$output_folder-sample/people"
+    mkdir -p "$output_folder-sample/houses"
+
     echo "Sampling ${output_folder}..."
 
     cp "$output_folder/_default_parameters.ini" "$output_folder-sample/_default_parameters.ini" |& indent2
@@ -62,14 +68,21 @@ for output_folder in "$@"; do
 
     echo "Copying person files..." | indent2
     for file in `cat $sample_file`; do
-        cp "$output_folder/$file" "$output_folder-sample/$file" |& indent4
-    done
-    echo "Copying house files with it..." | indent2
+        cp "$output_folder/$file" "$output_folder-sample/people/$file" |& indent4
 
-    for house_file in `cat $sample_file | sed -r 's/\.txt/_house\.txt/g'`; do
-        cp "$output_folder/$house_file" "$output_folder-sample/$house_file" |& indent4
+        #echo "Copying house files with it..." | indent4
+
+        for house_num in `sed '3q;d' $output_folder/$file | cut -d'|' -f10`; do
+            cp "houses/house_1845_$house_num.csv" "$output_folder-sample/houses/" |& indent4
+        done
+
+        for house_num in `tail --lines=+6 $output_folder/$file | cut -d'|' -f10`; do
+            cp "houses/house_1850_$house_num.csv" "$output_folder-sample/houses/" |& indent4
+        done
     done
-    echo "Copied $(ls "$output_folder-sample" | wc -l) files." | indent2
+
+    echo -n "Copied $(ls "$output_folder-sample/people" | wc -l) people" | indent2
+    echo "and $(ls "$output_folder-sample/houses" | wc -l) houses."
 
     echo "Zipping..." | indent2
     zip "$output_folder-sample.zip" -r "$output_folder-sample" |& indent4
