@@ -133,12 +133,10 @@ def husdistance(peoplearr1,peoplearr2,p1,p2,husarr1,husarr2) :
         peopleinhouse2.append(peoplearr2[hus2[i]])
 
     for person in peopleinhouse1 :
-        # print "Muuh "   + person.fornavn # check it makes the correct comparisons
         for person2 in peopleinhouse2 :
-         #   print "Maaaeeh " + person2.fornavn # Just to check that It actually enters the loop
             totalhusdistance += person_distance_score(person,person2)
 
-    if(hus1size != 0) :
+    if(housedivisor != 0) :
         if((totalhusdistance / housedivisor) > config.husstand_min_weight) :
             return config.husstand_match_points
         else :
