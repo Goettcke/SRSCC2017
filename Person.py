@@ -63,21 +63,19 @@ def name_comparison(p1, p2) :
 
     if not config.use_legacy_name_comparison:
         count = 0
-        score = 0
+        diff = 0
 
         fornavne_score = config.name_comparison_fornavne_score
         efternavn_score = config.name_comparison_efternavn_score
 
-        for (fornavn1, fornavn2) in itertools.izip_longest(p1.meta_fornavne_list, p2.meta_fornavne_list, fillvalue=""):
-            if compare_metaphone(fornavn1, fornavn2):
-                score += fornavne_score
-            count += fornavne_score
+        for (fornavn1, fornavn2) in itertools.izip_longest(p1.fornavne_list, p2.fornavne_list, fillvalue=""):
+            diff += percent_levenshtein(fornavn1, fornavn2)
+            count += 1
 
-        if compare_metaphone(p1.meta_efternavn, p2.meta_efternavn):
-            score += efternavn_score
-        count += efternavn_score
+        diff += percent_levenshtein(p1.efternavn, p2.efternavn)
+        count += 1
 
-        return 1.0 - score / float(count)
+        return diff / count
 
 
 
