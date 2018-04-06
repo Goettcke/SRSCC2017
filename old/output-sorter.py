@@ -5,7 +5,7 @@ import io
 from shutil import copy
 
 input_folder_name = "output"
-output_folder_name = "output2"
+output_folder_name = "people"
 
 count = len(os.listdir(input_folder_name))
 count_len = len(str(count))
@@ -14,7 +14,7 @@ limit = 100
 
 for i, filename in enumerate(os.listdir(input_folder_name)):
 
-    s = bytes(filename, encoding="utf8", errors="replace").decode("utf8")
+    s = bytes(filename, encoding="utf8", errors="ignore").decode("utf8")
 
     print("({curr:{fill}{width}}/{total}) {filename}".format(
         curr=i+1, fill=' ', width=count_len, total=count, filename=s
@@ -44,7 +44,7 @@ for i, filename in enumerate(os.listdir(input_folder_name)):
             if not os.path.exists(out_path):
                 os.makedirs(out_path)
 
-            copy(in_path, out_path)
+            copy(in_path, os.path.join(out_path,s))
 
             break # Don't loop over more lines in the file
 
