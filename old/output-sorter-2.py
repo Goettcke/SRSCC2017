@@ -4,13 +4,13 @@ import os
 import io
 from shutil import copy
 
-input_folder_name = "/home/user/Backup/data/people/odense/vends/oerslev"
+input_folder_name = "output"
 output_folder_name = "people"
 
 count = len(os.listdir(input_folder_name))
 count_len = len(str(count))
 
-respect_limit = True
+respect_limit = False
 limit = 100
 
 delimiter = "|"
@@ -83,11 +83,11 @@ class CSVWriter:
     def get_line(self, person, candidate):
         person_fields = ["year", "kipnr", "loebenr"]
         candidate_fields = ["year", "kipnr", "loebenr", "weight"]
-        column_length = len(person_fields) + len(candidate_fields)
+        column_length = 1+len(person_fields) + len(candidate_fields)
         column_placeholders = ["{}"] * column_length
         row_fmt = ";".join(column_placeholders)
 
-        column_values = []
+        column_values = [""]
 
         for field in person_fields:
             assert hasattr(person, field)
@@ -104,6 +104,9 @@ class CSVWriter:
 for i, filename in enumerate(os.listdir(input_folder_name)):
 
     s = bytes(filename, encoding="utf8", errors="ignore").decode("utf8")
+
+    if s.startswith(".") or s.startswith("_"):
+        continue
 
     print("({curr:{fill}{width}}/{total}) {filename}".format(
         curr=i+1, fill=' ', width=count_len, total=count, filename=s
